@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CastNotifications</string>
+    <string name="cast_notifications_connecting">"Connecting to %1$s"</string>
+    <string name="cast_notifications_discovering">Searching for Cast devices</string>
+</resources>
