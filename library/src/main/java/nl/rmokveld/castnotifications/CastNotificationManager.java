@@ -34,11 +34,11 @@ public class CastNotificationManager {
     private final MediaRouteSelector sMediaRouteSelector;
 
     private final CastCompanionInterface mCastCompanionInterface;
-    private final MediaInfoSerializer mMediaInfoSerializer;
     private final Context mContext;
     private final Map<MediaRouter.RouteInfo, CastDevice> mAvailableRoutes = new HashMap<>();
     private final SparseArray<CastNotification> mCastNotifications = new SparseArray<>();
     private final Set<OnRouteAddedListener> mOnRouteAddedListeners = new HashSet<>();
+    private MediaInfoSerializer mMediaInfoSerializer = new DefaultMediaInfoSerializer();
     private NotificationBuilder mNotificationBuilder = new DefaultNotificationBuilder();
     private OnApplicationConnectedListener mOnApplicationConnectedListener;
 
@@ -66,12 +66,10 @@ public class CastNotificationManager {
 
     private CastNotificationManager(Context context,
                                     @NonNull MediaRouteSelector selector,
-                                    @NonNull CastCompanionInterface castCompanionInterface,
-                                    @NonNull MediaInfoSerializer mediaInfoSerializer) {
+                                    @NonNull CastCompanionInterface castCompanionInterface) {
         mContext = context.getApplicationContext();
         sMediaRouteSelector = selector;
         mCastCompanionInterface = castCompanionInterface;
-        mMediaInfoSerializer = mediaInfoSerializer;
         mDatabase = new NotificationDatabase(mContext);
         mDatabase.getCastNotifications(new NotificationDatabase.Callback() {
             @Override
@@ -92,9 +90,8 @@ public class CastNotificationManager {
         return sInstance;
     }
 
-    public static void init(Context context, @NonNull MediaRouteSelector selector, @NonNull CastCompanionInterface castCompanionInterface,
-                            @NonNull MediaInfoSerializer mediaInfoSerializer) {
-        sInstance = new CastNotificationManager(context, selector, castCompanionInterface, mediaInfoSerializer);
+    public static void init(Context context, @NonNull MediaRouteSelector selector, @NonNull CastCompanionInterface castCompanionInterface) {
+        sInstance = new CastNotificationManager(context, selector, castCompanionInterface);
     }
 
     public void notify(int id, String title, String contentText, @NonNull MediaInfo mediaInfo) {
@@ -122,6 +119,11 @@ public class CastNotificationManager {
     @NonNull
     CastCompanionInterface getCastCompanionInterface() {
         return mCastCompanionInterface;
+    }
+
+    @SuppressWarnings("unused")
+    public void setCustomMediaInfoSerializer(MediaInfoSerializer mediaInfoSerializer) {
+        mMediaInfoSerializer = mediaInfoSerializer;
     }
 
     @NonNull

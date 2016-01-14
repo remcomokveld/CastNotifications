@@ -16,7 +16,6 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.Transi
 import nl.rmokveld.castnotifications.CastCompanionInterface;
 import nl.rmokveld.castnotifications.CastNotification;
 import nl.rmokveld.castnotifications.CastNotificationManager;
-import nl.rmokveld.castnotifications.MediaInfoSerializer;
 import nl.rmokveld.castnotifications.NotificationBuilder;
 
 public class SampleApp extends Application {
@@ -53,22 +52,6 @@ public class SampleApp extends Application {
             @Override
             public void onDeviceSelected(CastDevice device) {
                 VideoCastManager.getInstance().onDeviceSelected(device);
-            }
-        }, new MediaInfoSerializer() {
-            @Override
-            public MediaInfo toMediaInfo(String json) {
-                MediaMetadata metadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
-                metadata.putString(MediaMetadata.KEY_TITLE, "Test");
-                return new MediaInfo.Builder("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")
-                        .setContentType("video/mp4")
-                        .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                        .setMetadata(metadata)
-                        .build();
-            }
-
-            @Override
-            public String toJson(MediaInfo mediaInfo) {
-                return "test";
             }
         });
         CastNotificationManager.getInstance().setCustomNotificationBuilder(new NotificationBuilder() {
