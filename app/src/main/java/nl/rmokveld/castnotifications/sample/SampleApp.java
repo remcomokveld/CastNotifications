@@ -2,11 +2,11 @@ package nl.rmokveld.castnotifications.sample;
 
 import android.app.Application;
 import android.support.v7.app.NotificationCompat;
+import android.support.v7.media.MediaRouteSelector;
 
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
@@ -34,7 +34,7 @@ public class SampleApp extends Application {
 
 
         VideoCastManager instance = VideoCastManager.getInstance();
-        CastNotificationManager.init(this, instance.getMediaRouteSelector(), new CastCompanionInterface() {
+        CastNotificationManager.init(this, new CastCompanionInterface() {
             @Override
             public void loadMedia(MediaInfo media) {
                 try {
@@ -42,6 +42,11 @@ public class SampleApp extends Application {
                 } catch (TransientNetworkDisconnectionException | NoConnectionException e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public MediaRouteSelector getMediaRouteSelector() {
+                return VideoCastManager.getInstance().getMediaRouteSelector();
             }
 
             @Override

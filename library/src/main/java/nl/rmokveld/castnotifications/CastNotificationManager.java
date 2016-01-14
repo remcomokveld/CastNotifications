@@ -31,8 +31,6 @@ public class CastNotificationManager {
 
     private static CastNotificationManager sInstance;
 
-    private final MediaRouteSelector sMediaRouteSelector;
-
     private final CastCompanionInterface mCastCompanionInterface;
     private final Context mContext;
     private final Map<MediaRouter.RouteInfo, CastDevice> mAvailableRoutes = new HashMap<>();
@@ -65,10 +63,8 @@ public class CastNotificationManager {
     private final NotificationDatabase mDatabase;
 
     private CastNotificationManager(Context context,
-                                    @NonNull MediaRouteSelector selector,
                                     @NonNull CastCompanionInterface castCompanionInterface) {
         mContext = context.getApplicationContext();
-        sMediaRouteSelector = selector;
         mCastCompanionInterface = castCompanionInterface;
         mDatabase = new NotificationDatabase(mContext);
         mDatabase.getCastNotifications(new NotificationDatabase.Callback() {
@@ -90,8 +86,8 @@ public class CastNotificationManager {
         return sInstance;
     }
 
-    public static void init(Context context, @NonNull MediaRouteSelector selector, @NonNull CastCompanionInterface castCompanionInterface) {
-        sInstance = new CastNotificationManager(context, selector, castCompanionInterface);
+    public static void init(Context context, @NonNull CastCompanionInterface castCompanionInterface) {
+        sInstance = new CastNotificationManager(context, castCompanionInterface);
     }
 
     public void notify(int id, String title, String contentText, @NonNull MediaInfo mediaInfo) {
@@ -113,7 +109,7 @@ public class CastNotificationManager {
 
     @NonNull
     MediaRouteSelector getMediaRouteSelector() {
-        return sMediaRouteSelector;
+        return mCastCompanionInterface.getMediaRouteSelector();
     }
 
     @NonNull
