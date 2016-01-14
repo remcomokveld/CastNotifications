@@ -7,6 +7,9 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.cast.MediaInfo;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 public class CastNotification {
 
     public static final int STATE_NORMAL = 0;
@@ -81,6 +84,7 @@ public class CastNotification {
     }
 
     @IntDef({STATE_NORMAL, STATE_CONNECTING})
+    @Retention(RetentionPolicy.SOURCE)
     @interface State {
     }
 }
