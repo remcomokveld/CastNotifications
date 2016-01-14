@@ -99,7 +99,7 @@ public class DiscoveryService extends Service {
     private void startForeground(String title, String contentText) {
         Log.d(TAG, "startForeground() called with: " + "title = [" + title + "], contentText = [" + contentText + "]");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setSmallIcon(R.drawable.ic_cast)
+        builder.setSmallIcon(R.drawable.ic_stat_cast_notifications)
                 .setContentTitle(title)
                 .setContentText(contentText)
                 .setPriority(NotificationCompat.PRIORITY_MIN);
