@@ -24,6 +24,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
-    compile project(':library')
+    debugCompile project(path: ':library', configuration: 'gms84Support2311Debug')
+    releaseCompile project(path: ':library', configuration: 'gms84Support2311Release')
     compile project(':CastCompanionLibrary')
 }
