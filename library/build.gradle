@@ -75,7 +75,7 @@ publish {
 }
 
 project.afterEvaluate {
-
+    project.publishing.publications.remove(project.publishing.publications.first())
     project.android.libraryVariants.each { variant ->
         if (variant.buildType.name == "debug") return;
         Artifacts artifacts = project.plugins.hasPlugin('com.android.library') ? new AndroidArtifacts() : new JavaArtifacts()
