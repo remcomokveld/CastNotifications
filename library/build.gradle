@@ -73,6 +73,9 @@ publish {
 
     bintrayUser = System.getenv("BINTRAY_USER")
     bintrayKey = System.getenv("BINTRAY_KEY")
+    dryRun = false
+
+    publications = ["gms84Support2311Release","gms83Support2311Release","gms75Support2311Release"]
 
 }
 
