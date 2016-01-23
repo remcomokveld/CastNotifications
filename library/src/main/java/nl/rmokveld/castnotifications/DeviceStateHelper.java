@@ -11,7 +11,7 @@ class DeviceStateHelper {
 
     static boolean isWifiConnected() {
         ConnectivityManager connectivityManager = (ConnectivityManager) CastNotificationManager.getInstance().getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             boolean wifiConnected = false;
             for (Network network : connectivityManager.getAllNetworks()) {
                 NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
