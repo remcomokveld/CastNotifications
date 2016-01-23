@@ -1,3 +1,6 @@
-include ':app', ':library'
-include ':CastCompanionLibrary'
-project(':CastCompanionLibrary').projectDir = new File('../CastCompanionLibrary/')
+include ':library'
+if (System.getenv("TRAVIS") != "true") {
+    include ':app'
+    include ':CastCompanionLibrary'
+    project(':CastCompanionLibrary').projectDir = new File('../CastCompanionLibrary/')
+}
