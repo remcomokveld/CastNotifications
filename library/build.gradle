@@ -16,14 +16,36 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    flavorDimensions "gms", "support"
+
+    productFlavors {
+
+        gms84 {
+            dimension "gms"
+        }
+        gms83 {
+            dimension "gms"
+        }
+        gms75 {
+            dimension "gms"
+        }
+
+        support2311 {
+            dimension "support"
+        }
+
+    }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:mediarouter-v7:23.1.1'
-    compile 'com.google.android.gms:play-services-cast:8.4.0'
+    support2311Compile 'com.android.support:appcompat-v7:23.1.1'
+    support2311Compile 'com.android.support:mediarouter-v7:23.1.1'
+    gms84Compile 'com.google.android.gms:play-services-cast:8.4.0'
+    gms83Compile 'com.google.android.gms:play-services-cast:8.3.0'
+    gms75Compile 'com.google.android.gms:play-services-cast:7.5.0'
 }
 
 apply plugin: 'com.novoda.bintray-release' // must be applied after your artifact generating plugin (eg. java / com.android.library)
@@ -37,6 +59,8 @@ buildscript {
     }
 }
 
+import com.novoda.gradle.release.*
+
 publish {
     userOrg = 'rmokveld'
     groupId = 'nl.rmokveld'
@@ -44,4 +68,32 @@ publish {
     publishVersion = '0.1.1'
     desc = 'Library to allow casting directly from a notification'
     website = 'https://github.com/remcomokveld/CastNotifications'
+
+    bintrayUser = System.getenv("BINTRAY_USER")
+    bintrayKey = System.getenv("BINTRAY_KEY")
+
 }
+
+project.afterEvaluate {
+
+    project.android.libraryVariants.each { variant ->
+        if (variant.buildType.name == "debug") return;
+        Artifacts artifacts = project.plugins.hasPlugin('com.android.library') ? new AndroidArtifacts() : new JavaArtifacts()
+
+        project.publishing.publications.create(variant.name, MavenPublication) {
+            groupId project.publish.groupId
+            artifactId project.publish.artifactId+"-"+variant.productFlavors.collect { it.name }.join("-")
+            version = project.publish.publishVersion
+
+            artifacts.all(it.name, project).each {
+                if (it instanceof CharSequence) {
+                    delegate.artifact "${project.buildDir}/outputs/aar/${project.name}-${variant.baseName}.aar"
+                } else {
+                    delegate.artifact it
+                }
+            }
+            from artifacts.from(project)
+        }
+    }
+}
+
