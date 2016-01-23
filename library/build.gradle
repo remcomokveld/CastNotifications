@@ -61,11 +61,13 @@ buildscript {
 
 import com.novoda.gradle.release.*
 
+version = "0.1"
+
 publish {
     userOrg = 'rmokveld'
     groupId = 'nl.rmokveld'
     artifactId = 'cast-notification'
-    publishVersion = '0.1.1'
+    publishVersion = System.getenv("TRAVIS") == "true" ? (project.version + System.getenv("TRAVIS_BUILD_NUMBER")) : (project.version + "-dev")
     desc = 'Library to allow casting directly from a notification'
     website = 'https://github.com/remcomokveld/CastNotifications'
 
