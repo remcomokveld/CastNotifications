@@ -23,7 +23,7 @@ public class RegisterIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         try {
-            String token = InstanceID.getInstance(this).getToken(getString(R.string.gcm_defaultSenderId), GoogleCloudMessaging.INSTANCE_ID_SCOPE);
+            String token = InstanceID.getInstance(this).getToken(getString(R.string.gcm_sender_id), GoogleCloudMessaging.INSTANCE_ID_SCOPE);
             Log.d(TAG, token);
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent("gcm_token").putExtra("token", token));
         } catch (IOException e) {

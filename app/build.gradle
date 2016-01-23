@@ -27,5 +27,3 @@ dependencies {
     compile project(':library')
     compile project(':CastCompanionLibrary')
 }
-
-apply plugin: 'com.google.gms.google-services'
