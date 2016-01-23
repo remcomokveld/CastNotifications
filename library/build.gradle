@@ -67,7 +67,7 @@ publish {
     userOrg = 'rmokveld'
     groupId = 'nl.rmokveld'
     artifactId = 'cast-notification'
-    publishVersion = System.getenv("TRAVIS") == "true" ? (project.version + System.getenv("TRAVIS_BUILD_NUMBER")) : (project.version + "-dev")
+    publishVersion = System.getenv("TRAVIS") == "true" ? (project.version + "." + System.getenv("TRAVIS_BUILD_NUMBER")) : (project.version + "-dev")
     desc = 'Library to allow casting directly from a notification'
     website = 'https://github.com/remcomokveld/CastNotifications'
 
