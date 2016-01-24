@@ -14,7 +14,7 @@ import java.lang.annotation.RetentionPolicy;
 
 public class CastNotification implements Parcelable {
 
-    private static MediaInfoSerializer sMediaInfoSerializer;
+    private static MediaInfoSerializer sMediaInfoSerializer = new DefaultMediaInfoSerializer();
     public static final int STATE_NORMAL = 0;
     public static final int STATE_CONNECTING = 1;
     public static final String TABLE_NAME = "Notifications";
