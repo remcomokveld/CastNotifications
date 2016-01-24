@@ -161,7 +161,7 @@ public class CastNotificationManager {
     void onScreenTurnedOn() {
         Log.d(TAG, "onScreenTurnedOn()");
         if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
-            DiscoveryService.start(mContext, "onScreenTurnedOn");
+            DiscoveryService.setTimeout(mContext);
         }
     }
 

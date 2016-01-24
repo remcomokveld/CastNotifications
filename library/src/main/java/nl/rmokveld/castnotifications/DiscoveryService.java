@@ -12,6 +12,7 @@ public class DiscoveryService extends BaseCastService {
     private static final String ACTION_START = BuildConfig.APPLICATION_ID + ".action.START_DISCOVERY";
     private static final String ACTION_START_WAKEUP = BuildConfig.APPLICATION_ID + ".action.START_DISCOVERY_WAKEUP";
     private static final String ACTION_REMOVE_TIMEOUT = BuildConfig.APPLICATION_ID + ".action_REMOVE_TIMEOUT";
+    private static final String ACTION_SET_TIMEOUT = BuildConfig.APPLICATION_ID + ".action_SET_TIMEOUT";
 
     public static void start(Context context, String tag) {
         context.startService(buildIntent(context, tag));
@@ -36,6 +37,11 @@ public class DiscoveryService extends BaseCastService {
         context.startService(new Intent(context, DiscoveryService.class).setAction(ACTION_REMOVE_TIMEOUT));
     }
 
+    public static void setTimeout(Context context) {
+        Log.d(TAG, "setTimeout() called with: " + "context = [" + context + "]");
+        context.startService(new Intent(context, DiscoveryService.class).setAction(ACTION_SET_TIMEOUT));
+    }
+
     @Override
     public String getTAG() {
         return TAG;
@@ -55,6 +61,8 @@ public class DiscoveryService extends BaseCastService {
             startDiscovery(false, DeviceStateHelper.isScreenTurnedOn(this) ? 10000 : 0);
         } else if (ACTION_REMOVE_TIMEOUT.equals(intent.getAction())) {
             resetTimeout(0);
+        } else if (ACTION_SET_TIMEOUT.equals(intent.getAction())) {
+            resetTimeout(10000);
         }
         return START_REDELIVER_INTENT;
     }
