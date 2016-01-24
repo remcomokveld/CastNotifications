@@ -9,8 +9,8 @@ import android.os.PowerManager;
 
 class DeviceStateHelper {
 
-    static boolean isWifiConnected() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) CastNotificationManager.getInstance().getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+    static boolean isWifiConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             boolean wifiConnected = false;
             for (Network network : connectivityManager.getAllNetworks()) {
@@ -24,8 +24,8 @@ class DeviceStateHelper {
         }
     }
 
-    static boolean isScreenTurnedOn() {
-        PowerManager powerManager = (PowerManager) CastNotificationManager.getInstance().getContext().getSystemService(Context.POWER_SERVICE);
+    static boolean isScreenTurnedOn(Context context) {
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
             return powerManager.isInteractive();
         //noinspection deprecation

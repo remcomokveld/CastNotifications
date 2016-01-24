@@ -164,7 +164,7 @@ public class CastNotificationManager {
     ///// STATE CHANGES
     private void onActiveNotificationsChanged() {
         if (hasActiveNotifications()) {
-            if (DeviceStateHelper.isWifiConnected()) {
+            if (DeviceStateHelper.isWifiConnected(mContext)) {
                 DiscoveryService.start(mContext, "", false);
             }
         } else {
@@ -174,19 +174,19 @@ public class CastNotificationManager {
     }
 
     void onScreenTurnedOn() {
-        if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected()) {
+        if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
             DiscoveryService.start(mContext, "", false);
         }
     }
 
     void onScreenTurnedOff() {
-        if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected()) {
+        if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
             DiscoveryService.removeTimeout(mContext);
         }
     }
 
     void onWifiStateChanged() {
-        if (DeviceStateHelper.isWifiConnected()) {
+        if (DeviceStateHelper.isWifiConnected(mContext)) {
             if (hasActiveNotifications()) {
                 DiscoveryService.start(mContext, "", false);
             }
@@ -211,7 +211,7 @@ public class CastNotificationManager {
     private void postNotification(CastNotification castNotification, Collection<CastDevice> castDevices) {
         Log.d(TAG, "postNotification() called with: " + "castNotification = [" + castNotification + "], castDevices = [" + castDevices + "]");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-        CastNotificationManager.getInstance().getNotificationBuilder().build(castNotification, builder);
+        CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, castNotification, builder);
         builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, new Intent(mContext, NotificationDeletedReceiver.class).setData(Uri.parse("content://" + BuildConfig.APPLICATION_ID + "/notifications/" + castNotification.getId())), PendingIntent.FLAG_UPDATE_CURRENT));
         if (castNotification.getState() == CastNotification.STATE_NORMAL) {
             for (CastDevice castDevice : castDevices) {
@@ -224,7 +224,7 @@ public class CastNotificationManager {
     }
 
     void setDiscoveryAlarm() {
-        if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected()) {
+        if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             PendingIntent operation = PendingIntent.getService(mContext, 0, DiscoveryService.buildIntent(mContext, "", false), PendingIntent.FLAG_UPDATE_CURRENT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)

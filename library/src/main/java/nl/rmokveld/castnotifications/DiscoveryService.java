@@ -81,7 +81,7 @@ public class DiscoveryService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand() called with: " + "intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
         if (ACTION_START.equals(intent.getAction())) {
-            if (!DeviceStateHelper.isWifiConnected()) {
+            if (!DeviceStateHelper.isWifiConnected(this)) {
                 stopSelf();
                 return START_NOT_STICKY;
             }
@@ -89,7 +89,7 @@ public class DiscoveryService extends Service {
             for (MediaRouter.RouteInfo routeInfo : mMediaRouter.getRoutes()) {
                 CastNotificationManager.getInstance().getMediaRouterCallback().onRouteAdded(mMediaRouter, routeInfo);
             }
-            startDiscovery(intent.getBooleanExtra(EXTRA_WAKE_UP, false), DeviceStateHelper.isScreenTurnedOn(), notificationTitle);
+            startDiscovery(intent.getBooleanExtra(EXTRA_WAKE_UP, false), DeviceStateHelper.isScreenTurnedOn(this), notificationTitle);
         } else if (ACTION_REMOVE_TIMEOUT.equals(intent.getAction())) {
             mTimeoutHandler.removeCallbacks(mTimeOutRunnable);
         }
