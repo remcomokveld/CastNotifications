@@ -17,6 +17,7 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.Transi
 
 import nl.rmokveld.castnotifications.CastCompanionInterface;
 import nl.rmokveld.castnotifications.CastNotificationManager;
+import nl.rmokveld.castnotifications.DefaultNotificationBuilder;
 import nl.rmokveld.castnotifications.NotificationBuilder;
 
 public class SampleApp extends Application {
@@ -61,25 +62,12 @@ public class SampleApp extends Application {
             }
         });
         CastNotificationManager.getInstance().setLogLevel(Log.DEBUG);
-        CastNotificationManager.getInstance().setCustomNotificationBuilder(new NotificationBuilder() {
+        CastNotificationManager.getInstance().setCustomNotificationBuilder(new DefaultNotificationBuilder() {
 
             @Override
             public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, boolean castDevicesAvailable) {
-                builder.setSmallIcon(R.drawable.ic_audiotrack)
-                        .setContentTitle(title);
-                if (subtitle != null)
-                    builder.setContentText(subtitle);
-            }
-
-            @Override
-            public void buildForConnecting(Context context, NotificationCompat.Builder builder, int id, String title, String deviceName) {
-                build(context, builder, id, title, null, true);
-                builder.setContentText(getString(R.string.cast_notifications_connecting, deviceName));
-            }
-
-            @Override
-            public void buildForError(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle) {
-
+                super.build(context, builder, id, title, subtitle, castDevicesAvailable);
+                builder.setSmallIcon(R.drawable.ic_audiotrack);
             }
         });
         instance.addVideoCastConsumer(new VideoCastConsumerImpl() {
