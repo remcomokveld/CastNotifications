@@ -93,11 +93,23 @@ public class StartCastService extends BaseCastService implements CastNotificatio
     @UiThread
     private void startCastApplication() {
         Log.d(getTAG(), "startCastApplication() called");
-        mRequestedDeviceId = null;
-        mRequestedDeviceName = null;
+
         if (!mSelectedRouteInfo.isSelected()) {
+            mMediaRouter.addCallback(mCastNotificationManager.getMediaRouteSelector(), new MediaRouter.Callback() {
+                @Override
+                public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
+                    if (mRequestedDeviceId.equals(route.getId())) {
+                        mCastNotificationManager.getCastCompanionInterface().onDeviceSelected(CastDevice.getFromBundle(route.getExtras()));
+                    }
+                    mRequestedDeviceId = null;
+                    mRequestedDeviceName = null;
+                    mMediaRouter.removeCallback(this);
+                }
+            });
             mSelectedRouteInfo.select();
         } else {
+            mRequestedDeviceId = null;
+            mRequestedDeviceName = null;
             if (!mCastNotificationManager.getCastCompanionInterface().isApplicationConnected()) {
                 Log.d(getTAG(), "onDeviceSelected called on CastCompanionInterface");
                 mCastNotificationManager.getCastCompanionInterface().onDeviceSelected(mSelectedCastDevice);
