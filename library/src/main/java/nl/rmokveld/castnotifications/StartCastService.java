@@ -122,6 +122,7 @@ public class StartCastService extends BaseCastService implements CastNotificatio
 
     @Override
     protected void onDiscoveryTimeout() {
+        Log.d(TAG, "onDiscoveryTimeout() called with: " + "");
         if (mRequestedDevice != null) {
             // discovery failed
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this);

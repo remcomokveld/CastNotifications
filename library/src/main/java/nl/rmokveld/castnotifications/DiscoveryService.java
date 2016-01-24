@@ -13,23 +13,26 @@ public class DiscoveryService extends BaseCastService {
     private static final String ACTION_START_WAKEUP = BuildConfig.APPLICATION_ID + ".action.START_DISCOVERY_WAKEUP";
     private static final String ACTION_REMOVE_TIMEOUT = BuildConfig.APPLICATION_ID + ".action_REMOVE_TIMEOUT";
 
-    public static void start(Context context) {
-        context.startService(buildIntent(context));
+    public static void start(Context context, String tag) {
+        context.startService(buildIntent(context, tag));
     }
 
-    static Intent buildIntent(Context context) {
-        return buildIntent(context, false);
+    static Intent buildIntent(Context context, String tag) {
+        return buildIntent(context, false, tag);
     }
 
-    static Intent buildIntent(Context context, boolean wakeup) {
-        return new Intent(context, DiscoveryService.class).setAction(wakeup ? ACTION_START_WAKEUP : ACTION_START);
+    static Intent buildIntent(Context context, boolean wakeup, String tag) {
+        return new Intent(context, DiscoveryService.class).setAction(wakeup ? ACTION_START_WAKEUP : ACTION_START)
+                .putExtra("tag", tag);
     }
 
     public static void stop(Context context) {
+        Log.d(TAG, "stop() called with: " + "context = [" + context + "]");
         context.stopService(new Intent(context, DiscoveryService.class));
     }
 
     public static void removeTimeout(Context context) {
+        Log.d(TAG, "removeTimeout() called with: " + "context = [" + context + "]");
         context.startService(new Intent(context, DiscoveryService.class).setAction(ACTION_REMOVE_TIMEOUT));
     }
 
@@ -40,7 +43,7 @@ public class DiscoveryService extends BaseCastService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(getTAG(), "onStartCommand() called with: " + "intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
+        Log.d(getTAG(), "onStartCommand() called with: " + "tag = [" + intent.getStringExtra("tag") + "], intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
         if (ACTION_START.equals(intent.getAction()) || ACTION_START_WAKEUP.equals(intent.getAction())) {
             if (!DeviceStateHelper.isWifiConnected(this)) {
                 stopDiscovery();

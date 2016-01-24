@@ -147,9 +147,10 @@ public class CastNotificationManager {
 
     ///// STATE CHANGES
     private void onActiveNotificationsChanged() {
+        Log.d(TAG, "onActiveNotificationsChanged() called with: " + "");
         if (hasActiveNotifications()) {
             if (DeviceStateHelper.isWifiConnected(mContext)) {
-                DiscoveryService.start(mContext);
+                DiscoveryService.start(mContext, "active notifications changed");
             }
         } else {
             DiscoveryService.stop(mContext);
@@ -158,21 +159,24 @@ public class CastNotificationManager {
     }
 
     void onScreenTurnedOn() {
+        Log.d(TAG, "onScreenTurnedOn()");
         if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
-            DiscoveryService.start(mContext);
+            DiscoveryService.start(mContext, "onScreenTurnedOn");
         }
     }
 
     void onScreenTurnedOff() {
+        Log.d(TAG, "onScreenTurnedOff()");
         if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
             DiscoveryService.removeTimeout(mContext);
         }
     }
 
     void onWifiStateChanged() {
+        Log.d(TAG, "onWifiStateChanged()");
         if (DeviceStateHelper.isWifiConnected(mContext)) {
             if (hasActiveNotifications()) {
-                DiscoveryService.start(mContext);
+                DiscoveryService.start(mContext, "wifi state changed");
             }
         } else {
             mCastAvailabilityHelper.onWifiDisconnected();
@@ -209,7 +213,7 @@ public class CastNotificationManager {
     void setDiscoveryAlarm() {
         if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-            PendingIntent operation = PendingIntent.getService(mContext, 0, DiscoveryService.buildIntent(mContext), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent operation = PendingIntent.getService(mContext, 0, DiscoveryService.buildIntent(mContext, "alarm_service"), PendingIntent.FLAG_UPDATE_CURRENT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
                 alarmManager.setWindow(AlarmManager.RTC, 1000 * 60 * 60, 1000 * 60 * 10, operation);
             else
