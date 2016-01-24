@@ -4,13 +4,13 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.android.gms.cast.MediaInfo;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class CastNotification implements Parcelable {
 
@@ -20,28 +20,37 @@ class CastNotification implements Parcelable {
     private static final String COL_TITLE = "title";
     private static final String COL_TEXT = "text";
     private static final String COL_MEDIA_INFO = "media_info";
+    private static final String COL_CUSTOM_DATA = "custom_data";
     static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" +
             COL_ID + " INTEGER PRIMARY KEY," +
             COL_TITLE + " TEXT," +
             COL_TEXT + " TEXT," +
-            COL_MEDIA_INFO + " TEXT);";
+            COL_MEDIA_INFO + " TEXT," +
+            COL_CUSTOM_DATA + " TEXT);";
 
     private final int mId;
     private final String mTitle, mContentText;
     private final MediaInfo mMediaInfo;
+    private final JSONObject mCustomData;
     private String mDeviceName;
 
-    public CastNotification(int id, String title, String contentText, @NonNull MediaInfo mediaInfo) {
+    public CastNotification(int id, String title, String contentText, @NonNull MediaInfo mediaInfo, @Nullable JSONObject customData) {
         mId = id;
         mTitle = title;
         mContentText = contentText;
         mMediaInfo = mediaInfo;
+        mCustomData = customData;
     }
     public CastNotification(Cursor cursor) {
         mId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_ID));
         mTitle = cursor.getString(cursor.getColumnIndexOrThrow(COL_TITLE));
         mContentText = cursor.getString(cursor.getColumnIndexOrThrow(COL_TEXT));
         mMediaInfo = sMediaInfoSerializer.toMediaInfo(cursor.getString(cursor.getColumnIndexOrThrow(COL_MEDIA_INFO)));
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(cursor.getString(cursor.getColumnIndexOrThrow(COL_CUSTOM_DATA)));
+        } catch (JSONException ignored) {}
+        mCustomData = jsonObject;
     }
 
     protected CastNotification(Parcel in) {
@@ -51,6 +60,11 @@ class CastNotification implements Parcelable {
         //noinspection ResourceType
         mDeviceName = in.readString();
         mMediaInfo = sMediaInfoSerializer.toMediaInfo(in.readString());
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(in.readString());
+        } catch (JSONException ignored) {}
+        mCustomData = jsonObject;
     }
 
     public static void setMediaInfoSerializer(MediaInfoSerializer mediaInfoSerializer) {
@@ -64,6 +78,7 @@ class CastNotification implements Parcelable {
         dest.writeString(mContentText);
         dest.writeString(mDeviceName);
         dest.writeString(sMediaInfoSerializer.toJson(mMediaInfo));
+        dest.writeString(mCustomData != null ? mCustomData.toString() : null);
     }
 
     @Override
@@ -95,6 +110,10 @@ class CastNotification implements Parcelable {
         return mMediaInfo;
     }
 
+    public JSONObject getCustomData() {
+        return mCustomData;
+    }
+
     public int getId() {
         return mId;
     }
@@ -105,6 +124,8 @@ class CastNotification implements Parcelable {
         contentValues.put(COL_TITLE, mTitle);
         contentValues.put(COL_TEXT, mContentText);
         contentValues.put(COL_MEDIA_INFO, sMediaInfoSerializer.toJson(mMediaInfo));
+        if (mCustomData != null)
+            contentValues.put(COL_CUSTOM_DATA, mCustomData.toString());
         return contentValues;
     }
 

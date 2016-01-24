@@ -10,6 +10,6 @@ import nl.rmokveld.castnotifications.sample.MainActivity;
 public class GcmService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        CastNotificationManager.getInstance().notify(data.getInt("id"), data.getString("title"), data.getString("text"), MainActivity.getSampleMediaInfo());
+        CastNotificationManager.getInstance().notify(data.getInt("id"), data.getString("title"), data.getString("text"), MainActivity.getSampleMediaInfo(), null);
     }
 }

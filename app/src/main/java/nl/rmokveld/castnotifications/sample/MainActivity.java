@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 MediaInfo mediaInfo = getSampleMediaInfo();
-                CastNotificationManager.getInstance().notify(new Random().nextInt(4), "test", "test", mediaInfo);
+                CastNotificationManager.getInstance().notify(new Random().nextInt(4), "test", "test", mediaInfo, null);
             }
         });
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.media.MediaRouteSelector;
@@ -14,6 +15,8 @@ import android.support.v7.media.MediaRouter;
 import android.util.SparseArray;
 
 import com.google.android.gms.cast.MediaInfo;
+
+import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.List;
@@ -84,9 +87,9 @@ public class CastNotificationManager {
         sInstance = new CastNotificationManager(context, castCompanionInterface);
     }
 
-    public void notify(int id, String title, String contentText, @NonNull MediaInfo mediaInfo) {
+    public void notify(int id, String title, String contentText, @NonNull MediaInfo mediaInfo, @Nullable JSONObject customData) {
         Log.d(TAG, "notify() called with: " + "id = [" + id + "], title = [" + title + "], contentText = [" + contentText + "], mediaInfo = [" + mediaInfo + "]");
-        CastNotification notification = new CastNotification(id, title, contentText, mediaInfo);
+        CastNotification notification = new CastNotification(id, title, contentText, mediaInfo, customData);
         mCastNotifications.put(id, notification);
         persistNotifications();
         postNotification(notification, mCastAvailabilityHelper.getAvailableRoutes());
