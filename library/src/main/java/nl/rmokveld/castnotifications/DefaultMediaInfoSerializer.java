@@ -46,16 +46,16 @@ public class DefaultMediaInfoSerializer implements MediaInfoSerializer {
     @Override
     public String toJson(MediaInfo mediaInfo) {
         try {
-            return toJsonObject(mediaInfo).toString();
+            return toJSONObject(mediaInfo).toString();
         } catch (JSONException e) {
             return null;
         }
     }
 
     @NonNull
-    protected JSONObject toJsonObject(MediaInfo mediaInfo) throws JSONException {
+    protected JSONObject toJSONObject(MediaInfo mediaInfo) throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("metaData", getMetaDataJSONObject(mediaInfo.getMetadata()));
+        jsonObject.put("metaData", toJSONObject(mediaInfo.getMetadata()));
         jsonObject.put("contentId", mediaInfo.getContentId());
         jsonObject.put("streamType", mediaInfo.getStreamType());
         jsonObject.put("contentType", mediaInfo.getContentType());
@@ -65,7 +65,7 @@ public class DefaultMediaInfoSerializer implements MediaInfoSerializer {
     }
 
     @NonNull
-    protected JSONObject getMetaDataJSONObject(MediaMetadata metadata) throws JSONException {
+    protected JSONObject toJSONObject(MediaMetadata metadata) throws JSONException {
         JSONObject metaData = new JSONObject();
         if (metadata != null) {
             metaData.put("mediaType", metadata.getMediaType());
