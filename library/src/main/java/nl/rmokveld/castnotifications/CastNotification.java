@@ -12,7 +12,7 @@ import com.google.android.gms.cast.MediaInfo;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class CastNotification implements Parcelable {
+class CastNotification implements Parcelable {
 
     private static MediaInfoSerializer sMediaInfoSerializer = new DefaultMediaInfoSerializer();
     public static final String TABLE_NAME = "Notifications";

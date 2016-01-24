@@ -16,7 +16,6 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConn
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 
 import nl.rmokveld.castnotifications.CastCompanionInterface;
-import nl.rmokveld.castnotifications.CastNotification;
 import nl.rmokveld.castnotifications.CastNotificationManager;
 import nl.rmokveld.castnotifications.NotificationBuilder;
 
