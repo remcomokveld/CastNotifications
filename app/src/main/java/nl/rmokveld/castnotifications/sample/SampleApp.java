@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.media.MediaRouteSelector;
+import android.util.Log;
 
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.CastDevice;
@@ -60,6 +61,7 @@ public class SampleApp extends Application {
                 VideoCastManager.getInstance().onDeviceSelected(device);
             }
         });
+        CastNotificationManager.getInstance().setLogLevel(Log.DEBUG);
         CastNotificationManager.getInstance().setCustomNotificationBuilder(new NotificationBuilder() {
 
             @Override

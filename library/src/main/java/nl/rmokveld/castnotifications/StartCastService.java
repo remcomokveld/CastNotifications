@@ -9,7 +9,6 @@ import android.support.annotation.UiThread;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.media.MediaRouter;
-import android.util.Log;
 
 import com.google.android.gms.cast.CastDevice;
 

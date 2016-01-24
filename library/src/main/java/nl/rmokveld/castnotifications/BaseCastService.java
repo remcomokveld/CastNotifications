@@ -5,7 +5,6 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.v7.media.MediaRouter;
-import android.util.Log;
 
 public abstract class BaseCastService extends Service {
 

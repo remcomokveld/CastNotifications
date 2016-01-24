@@ -11,7 +11,6 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.android.gms.cast.MediaInfo;
@@ -100,6 +99,10 @@ public class CastNotificationManager {
         mCastNotifications.delete(notificationId);
         mDatabase.delete(notificationId);
         onActiveNotificationsChanged();
+    }
+
+    public void setLogLevel(int level) {
+        Log.setLevel(level);
     }
 
     @NonNull
