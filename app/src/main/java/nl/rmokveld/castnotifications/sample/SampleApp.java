@@ -1,6 +1,7 @@
 package nl.rmokveld.castnotifications.sample;
 
 import android.app.Application;
+import android.content.Context;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.media.MediaRouteSelector;
 
@@ -61,7 +62,7 @@ public class SampleApp extends Application {
         });
         CastNotificationManager.getInstance().setCustomNotificationBuilder(new NotificationBuilder() {
             @Override
-            public void build(CastNotification castNotification, NotificationCompat.Builder builder) {
+            public void build(Context context, CastNotification castNotification, NotificationCompat.Builder builder) {
                 builder.setSmallIcon(R.drawable.ic_audiotrack);
                 builder.setContentTitle(castNotification.getTitle());
                 if (castNotification.getState() == CastNotification.STATE_NORMAL)
