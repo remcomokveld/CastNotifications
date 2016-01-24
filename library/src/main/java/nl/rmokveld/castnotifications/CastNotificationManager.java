@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.UiThread;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.media.MediaRouteSelector;
@@ -15,11 +14,8 @@ import android.support.v7.media.MediaRouter;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,32 +29,26 @@ public class CastNotificationManager {
 
     private final CastCompanionInterface mCastCompanionInterface;
     private final Context mContext;
-    private final Map<MediaRouter.RouteInfo, CastDevice> mAvailableRoutes = new HashMap<>();
     private final SparseArray<CastNotification> mCastNotifications = new SparseArray<>();
-    private final Set<OnRouteAddedListener> mOnRouteAddedListeners = new HashSet<>();
+    private final CastAvailabilityHelper mCastAvailabilityHelper;
+    private final Set<OnApplicationConnectedListener> mOnApplicationConnectedListener = new HashSet<>();
     private NotificationBuilder mNotificationBuilder = new DefaultNotificationBuilder();
-    private OnApplicationConnectedListener mOnApplicationConnectedListener;
 
     private final MediaRouter.Callback mMediaRouterCallback = new MediaRouter.Callback() {
 
         @Override
         public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
             Log.d(TAG, "onRouteAdded() called with: " + "router = [" + router + "], route = [" + route + "]");
-            refreshRoutes(router);
-            for (OnRouteAddedListener listener : mOnRouteAddedListeners) {
-                if (mAvailableRoutes.containsKey(route))
-                    listener.onRouteAdded(route, mAvailableRoutes.get(route));
-            }
-            postNotifications();
+            mCastAvailabilityHelper.onRouteAdded(route);
         }
 
         @Override
         public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
             Log.d(TAG, "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "]");
-            refreshRoutes(router);
-            postNotifications();
+            mCastAvailabilityHelper.onRouteRemoved(router, route);
         }
     };
+
     private final NotificationDatabase mDatabase;
 
     private CastNotificationManager(Context context,
@@ -72,10 +62,16 @@ public class CastNotificationManager {
                 for (CastNotification castNotification : castNotifications) {
                     mCastNotifications.put(castNotification.getId(), castNotification);
                 }
-                postNotifications();
+                postNotifications(mCastAvailabilityHelper.getAvailableRoutes());
                 onActiveNotificationsChanged();
             }
         });
+        mCastAvailabilityHelper = new CastAvailabilityHelper() {
+            @Override
+            void onRoutesChanged(Map<String, String> availableRoutes) {
+                postNotifications(availableRoutes);
+            }
+        };
     }
 
     public static CastNotificationManager getInstance() {
@@ -94,7 +90,7 @@ public class CastNotificationManager {
         CastNotification notification = new CastNotification(id, title, contentText, mediaInfo);
         mCastNotifications.put(id, notification);
         persistNotifications();
-        postNotification(notification, mAvailableRoutes.values());
+        postNotification(notification, mCastAvailabilityHelper.getAvailableRoutes());
         onActiveNotificationsChanged();
     }
 
@@ -126,7 +122,7 @@ public class CastNotificationManager {
         mNotificationBuilder = notificationBuilder;
     }
 
-    private NotificationBuilder getNotificationBuilder() {
+    NotificationBuilder getNotificationBuilder() {
         return mNotificationBuilder;
     }
 
@@ -138,17 +134,8 @@ public class CastNotificationManager {
         return mContext;
     }
 
-    void refreshRoutes(MediaRouter router) {
-        Log.d(TAG, "refreshRoutes() called with: " + "router = [" + router + "]");
-        mAvailableRoutes.clear();
-        for (MediaRouter.RouteInfo routeInfo : router.getRoutes()) {
-            if (routeInfo.isDefault()) continue;
-            CastDevice castDevice = CastDevice.getFromBundle(routeInfo.getExtras());
-            if (castDevice != null && castDevice.isOnLocalNetwork()) {
-                Log.d(TAG, "refreshRoutes: route found:"+castDevice.getFriendlyName());
-                mAvailableRoutes.put(routeInfo, castDevice);
-            }
-        }
+    void refreshRoutes(MediaRouter mediaRouter) {
+        mCastAvailabilityHelper.refreshRoutes(mediaRouter);
     }
 
     private boolean hasActiveNotifications() {
@@ -159,7 +146,7 @@ public class CastNotificationManager {
     private void onActiveNotificationsChanged() {
         if (hasActiveNotifications()) {
             if (DeviceStateHelper.isWifiConnected(mContext)) {
-                DiscoveryService.start(mContext, "", false);
+                DiscoveryService.start(mContext);
             }
         } else {
             DiscoveryService.stop(mContext);
@@ -169,7 +156,7 @@ public class CastNotificationManager {
 
     void onScreenTurnedOn() {
         if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
-            DiscoveryService.start(mContext, "", false);
+            DiscoveryService.start(mContext);
         }
     }
 
@@ -182,35 +169,34 @@ public class CastNotificationManager {
     void onWifiStateChanged() {
         if (DeviceStateHelper.isWifiConnected(mContext)) {
             if (hasActiveNotifications()) {
-                DiscoveryService.start(mContext, "", false);
+                DiscoveryService.start(mContext);
             }
         } else {
-            DiscoveryService.stop(mContext);
-            mAvailableRoutes.clear();
-            postNotifications();
+            mCastAvailabilityHelper.onWifiDisconnected();
         }
     }
 
     public void onApplicationConnected() {
-        if (mOnApplicationConnectedListener != null)
-            mOnApplicationConnectedListener.onApplicationConnected();
-    }
-
-    private void postNotifications() {
-        for (int i = 0; i < mCastNotifications.size(); i++) {
-            postNotification(mCastNotifications.valueAt(i), mAvailableRoutes.values());
+        for (OnApplicationConnectedListener listener : mOnApplicationConnectedListener) {
+            listener.onApplicationConnected();
         }
     }
 
-    private void postNotification(CastNotification castNotification, Collection<CastDevice> castDevices) {
+    private void postNotifications(Map<String, String> availableRoutes) {
+        for (int i = 0; i < mCastNotifications.size(); i++) {
+            postNotification(mCastNotifications.valueAt(i), availableRoutes);
+        }
+    }
+
+    private void postNotification(CastNotification castNotification, Map<String, String> castDevices) {
         Log.d(TAG, "postNotification() called with: " + "castNotification = [" + castNotification + "], castDevices = [" + castDevices + "]");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
         CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, castNotification, builder);
         builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, new Intent(mContext, NotificationDeletedReceiver.class).setData(Uri.parse("content://" + BuildConfig.APPLICATION_ID + "/notifications/" + castNotification.getId())), PendingIntent.FLAG_UPDATE_CURRENT));
         if (castNotification.getState() == CastNotification.STATE_NORMAL) {
-            for (CastDevice castDevice : castDevices) {
-                builder.addAction(R.drawable.ic_cast_light, castDevice.getFriendlyName(),
-                        PendingIntent.getService(mContext, castNotification.getId(), StartCastService.getIntent(castNotification.getId(), mContext, castDevice, castNotification.getMediaInfo()),
+            for (String routeId : castDevices.keySet()) {
+                builder.addAction(R.drawable.ic_cast_light, castDevices.get(routeId),
+                        PendingIntent.getService(mContext, castNotification.getId(), StartCastService.getIntent(castNotification, mContext, routeId, castDevices.get(routeId)),
                                 PendingIntent.FLAG_UPDATE_CURRENT));
             }
         }
@@ -220,7 +206,7 @@ public class CastNotificationManager {
     void setDiscoveryAlarm() {
         if (hasActiveNotifications() && DeviceStateHelper.isWifiConnected(mContext)) {
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-            PendingIntent operation = PendingIntent.getService(mContext, 0, DiscoveryService.buildIntent(mContext, "", false), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent operation = PendingIntent.getService(mContext, 0, DiscoveryService.buildIntent(mContext), PendingIntent.FLAG_UPDATE_CURRENT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
                 alarmManager.setWindow(AlarmManager.RTC, 1000 * 60 * 60, 1000 * 60 * 10, operation);
             else
@@ -228,24 +214,12 @@ public class CastNotificationManager {
         }
     }
 
-    void setOnApplicationConnectedListener(OnApplicationConnectedListener onApplicationConnectedListener) {
-        mOnApplicationConnectedListener = onApplicationConnectedListener;
+    void addOnApplicationConnectedListener(OnApplicationConnectedListener listener) {
+        mOnApplicationConnectedListener.add(listener);
     }
 
-    void addOnRouteAddedListener(OnRouteAddedListener listener) {
-        mOnRouteAddedListeners.add(listener);
-    }
-
-    void removeOnRouteAddedListener(OnRouteAddedListener listener) {
-        mOnRouteAddedListeners.remove(listener);
-    }
-
-    void setStateConnecting(int notificationId, String deviceName) {
-        Log.d(TAG, "setStateConnecting() called with: " + "notificationId = [" + notificationId + "], deviceName = [" + deviceName + "]");
-        CastNotification castNotification = mCastNotifications.get(notificationId);
-        castNotification.setState(CastNotification.STATE_CONNECTING, deviceName);
-        persistNotifications();
-        postNotifications();
+    void removeOnApplicationConnectedListener(OnApplicationConnectedListener listener) {
+        mOnApplicationConnectedListener.remove(listener);
     }
 
     private void persistNotifications() {
@@ -257,7 +231,5 @@ public class CastNotificationManager {
     }
 
     interface OnRouteAddedListener {
-        @UiThread
-        void onRouteAdded(MediaRouter.RouteInfo routeInfo, CastDevice castDevice);
     }
 }

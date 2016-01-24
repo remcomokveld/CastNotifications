@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 
 import java.util.Random;
@@ -38,7 +40,14 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.add_notification).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CastNotificationManager.getInstance().notify(new Random().nextInt(4), "test", "test", null);
+                MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+                mediaMetadata.putString(MediaMetadata.KEY_TITLE, "test");
+                CastNotificationManager.getInstance().notify(new Random().nextInt(4), "test", "test",
+                        new MediaInfo.Builder("http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8")
+                                .setContentType("video/mp4")
+                                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                                .setMetadata(mediaMetadata)
+                                .build());
             }
         });
 

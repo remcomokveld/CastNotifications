@@ -76,6 +76,16 @@ public class SampleApp extends Application {
             public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
                 CastNotificationManager.getInstance().onApplicationConnected();
             }
+
+            @Override
+            public void onFailed(int resourceId, int statusCode) {
+                super.onFailed(resourceId, statusCode);
+            }
+
+            @Override
+            public void onRemoteMediaPlayerStatusUpdated() {
+                super.onRemoteMediaPlayerStatusUpdated();
+            }
         });
     }
 }

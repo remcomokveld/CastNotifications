@@ -1,53 +1,46 @@
 package nl.rmokveld.castnotifications;
 
-import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
 
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 
-public class StartCastService extends Service implements ServiceConnection, CastNotificationManager.OnApplicationConnectedListener, CastNotificationManager.OnRouteAddedListener {
+public class StartCastService extends BaseCastService implements CastNotificationManager.OnApplicationConnectedListener, CastNotificationManager.OnRouteAddedListener {
 
-    private static final String EXTRA_NOTIFICATION_ID = "notification_id";
+    private static final String EXTRA_NOTIFICATION = "notification_id";
     private static final String EXTRA_DEVICE_ID = "device_id";
     private static final String EXTRA_DEVICE_NAME = "device_name";
-    private static final String EXTRA_MEDIA_INFO = "media_info";
     private static final String TAG = "StartCastService";
 
-    private CastNotificationManager mCastNotificationManager;
-    private MediaRouter mMediaRouter;
     private String mRequestedDeviceId, mRequestedDeviceName;
     private MediaRouter.RouteInfo mSelectedRouteInfo;
     private CastDevice mSelectedCastDevice;
-    private DiscoveryService mDiscoveryService;
-    private MediaInfo mMediaInfo;
-    private int mNotificationId;
+    private CastNotification mCastNotification;
+    private NotificationCompat.Builder mNotificationBuilder;
 
     @NonNull
-    public static Intent getIntent(int notificationId, Context context, CastDevice castDevice, MediaInfo mediaInfo) {
+    public static Intent getIntent(CastNotification castNotification, Context context, String routeId, String deviceName) {
         return new Intent(context, StartCastService.class)
-                .putExtra(EXTRA_NOTIFICATION_ID, notificationId)
-                .putExtra(EXTRA_DEVICE_ID, castDevice.getDeviceId())
-                .putExtra(EXTRA_DEVICE_NAME, castDevice.getFriendlyName())
-                .putExtra(EXTRA_MEDIA_INFO, CastNotificationManager.getInstance().getMediaInfoSerializer().toJson(mediaInfo));
+                .putExtra(EXTRA_NOTIFICATION, castNotification)
+                .putExtra(EXTRA_DEVICE_ID, routeId)
+                .putExtra(EXTRA_DEVICE_NAME, deviceName);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mMediaRouter = MediaRouter.getInstance(this);
-        mCastNotificationManager = CastNotificationManager.getInstance();
-        mCastNotificationManager.setOnApplicationConnectedListener(this);
-        mCastNotificationManager.addOnRouteAddedListener(this);
+        mCastNotificationManager.addOnApplicationConnectedListener(this);
+        mNotificationBuilder = new NotificationCompat.Builder(this);
     }
 
     @Override
@@ -55,11 +48,41 @@ public class StartCastService extends Service implements ServiceConnection, Cast
         Log.d(TAG, "onStartCommand() called with: " + "intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
         mRequestedDeviceId = intent.getStringExtra(EXTRA_DEVICE_ID);
         mRequestedDeviceName = intent.getStringExtra(EXTRA_DEVICE_NAME);
-        mMediaInfo = CastNotificationManager.getInstance().getMediaInfoSerializer().toMediaInfo(intent.getStringExtra(EXTRA_MEDIA_INFO));
-        mNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, 0);
-        mCastNotificationManager.setStateConnecting(mNotificationId, mRequestedDeviceName);
+        mCastNotification = intent.getParcelableExtra(EXTRA_NOTIFICATION);
+        mCastNotification.setState(CastNotification.STATE_CONNECTING, mRequestedDeviceName);
+        mCastNotificationManager.cancel(mCastNotification.getId());
+        mCastNotificationManager.getNotificationBuilder().build(this, mCastNotification, mNotificationBuilder);
+
+        acquireWakeLocks();
+        startForeground(mCastNotification.getId(), mNotificationBuilder.build());
+
         findCastDevice();
+
         return START_NOT_STICKY;
+    }
+
+    @UiThread
+    private void findCastDevice() {
+        Log.d(TAG, "findCastDevice() called with: " + "");
+        for (MediaRouter.RouteInfo routeInfo : mMediaRouter.getRoutes()) {
+            if (mRequestedDeviceId.equals(routeInfo.getId())) {
+                mSelectedRouteInfo = routeInfo;
+                mSelectedCastDevice = CastDevice.getFromBundle(routeInfo.getExtras());
+            }
+        }
+        if (mSelectedCastDevice != null)
+            startCastApplication();
+        else {
+            startDiscovery(true, 10000);
+        }
+    }
+
+    @Override
+    protected void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo routeInfo) {
+        Log.d(TAG, "onRouteAdded() called with: " + "router = [" + router + "], routeInfo = [" + routeInfo + "]");
+        if (mRequestedDeviceId != null && mRequestedDeviceId.equals(routeInfo.getId())) {
+            startCastApplication();
+        }
     }
 
     @UiThread
@@ -71,8 +94,10 @@ public class StartCastService extends Service implements ServiceConnection, Cast
             mSelectedRouteInfo.select();
         } else {
             if (!mCastNotificationManager.getCastCompanionInterface().isApplicationConnected()) {
+                Log.d(TAG, "onDeviceSelected called on CastCompanionInterface");
                 mCastNotificationManager.getCastCompanionInterface().onDeviceSelected(mSelectedCastDevice);
             } else {
+                Log.d(TAG, "Receiver app already connected, ready to start casting");
                 onApplicationConnected();
             }
         }
@@ -81,31 +106,12 @@ public class StartCastService extends Service implements ServiceConnection, Cast
     @Override
     public void onApplicationConnected() {
         Log.d(TAG, "onApplicationConnected() called with: " + "");
-        mCastNotificationManager.cancel(mNotificationId);
-        mCastNotificationManager.getCastCompanionInterface().loadMedia(mMediaInfo);
+        mCastNotificationManager.cancel(mCastNotification.getId());
+        mCastNotificationManager.getCastCompanionInterface().loadMedia(mCastNotification.getMediaInfo());
         mSelectedRouteInfo = null;
         mSelectedCastDevice = null;
+        releaseWakeLocks();
         stopSelf();
-    }
-
-    @UiThread
-    private void findCastDevice() {
-        for (MediaRouter.RouteInfo routeInfo : mMediaRouter.getRoutes()) {
-            if (routeInfo.isDefault()) continue;
-            CastDevice castDevice = CastDevice.getFromBundle(routeInfo.getExtras());
-            if (castDevice != null && mRequestedDeviceId.equals(castDevice.getDeviceId())) {
-                mSelectedRouteInfo = routeInfo;
-                mSelectedCastDevice = castDevice;
-            }
-        }
-        if (mSelectedCastDevice != null)
-            startCastApplication();
-        else {
-            if (mDiscoveryService == null)
-                DiscoveryService.bind(this, getString(R.string.cast_notifications_connecting, mRequestedDeviceName), true, this);
-            else
-                mDiscoveryService.startDiscovery(true, true, getString(R.string.cast_notifications_connecting, mRequestedDeviceName));
-        }
     }
 
     @Nullable
@@ -115,30 +121,9 @@ public class StartCastService extends Service implements ServiceConnection, Cast
     }
 
     @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        mDiscoveryService = ((DiscoveryService.LocalBinder) service).getService();
-        mDiscoveryService.startDiscovery(true, true, getString(R.string.cast_notifications_connecting, mRequestedDeviceName));
-        Log.d(TAG, "Discovery active: " + mDiscoveryService.isDiscoveryActive());
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-        mDiscoveryService = null;
-    }
-
-    @Override
-    public void onRouteAdded(MediaRouter.RouteInfo routeInfo, CastDevice castDevice) {
-        if (castDevice.getDeviceId().equals(mRequestedDeviceId)) {
-            mSelectedRouteInfo = routeInfo;
-            mSelectedCastDevice = castDevice;
-            startCastApplication();
-        }
-    }
-
-    @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy() called with: " + "");
         super.onDestroy();
-        mCastNotificationManager.setOnApplicationConnectedListener(null);
-        mCastNotificationManager.removeOnRouteAddedListener(this);
+        mCastNotificationManager.removeOnApplicationConnectedListener(this);
     }
 }
