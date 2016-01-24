@@ -40,19 +40,23 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.add_notification).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
-                mediaMetadata.putString(MediaMetadata.KEY_TITLE, "test");
-                CastNotificationManager.getInstance().notify(new Random().nextInt(4), "test", "test",
-                        new MediaInfo.Builder("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")
-                                .setContentType("video/mp4")
-                                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                                .setMetadata(mediaMetadata)
-                                .build());
+                MediaInfo mediaInfo = getSampleMediaInfo();
+                CastNotificationManager.getInstance().notify(new Random().nextInt(4), "test", "test", mediaInfo);
             }
         });
 
         startService(new Intent(this, RegisterIntentService.class));
         mInstance = VideoCastManager.getInstance();
+    }
+
+    public static MediaInfo getSampleMediaInfo() {
+        MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+        mediaMetadata.putString(MediaMetadata.KEY_TITLE, "test");
+        return new MediaInfo.Builder("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")
+                .setContentType("video/mp4")
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setMetadata(mediaMetadata)
+                .build();
     }
 
     @Override
