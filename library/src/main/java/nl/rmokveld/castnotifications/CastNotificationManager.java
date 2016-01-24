@@ -200,12 +200,10 @@ public class CastNotificationManager {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
         CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castDevices.size() > 0);
         builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, new Intent(mContext, NotificationDeletedReceiver.class).setData(Uri.parse("content://" + BuildConfig.APPLICATION_ID + "/notifications/" + castNotification.getId())), PendingIntent.FLAG_UPDATE_CURRENT));
-        if (castNotification.getState() == CastNotification.STATE_NORMAL) {
-            for (String routeId : castDevices.keySet()) {
-                builder.addAction(R.drawable.ic_cast_light, castDevices.get(routeId),
-                        PendingIntent.getService(mContext, castNotification.getId(), StartCastService.getIntent(castNotification, mContext, routeId, castDevices.get(routeId)),
-                                PendingIntent.FLAG_UPDATE_CURRENT));
-            }
+        for (String routeId : castDevices.keySet()) {
+            builder.addAction(R.drawable.ic_cast_light, castDevices.get(routeId),
+                    PendingIntent.getService(mContext, castNotification.getId(), StartCastService.getIntent(castNotification, mContext, routeId, castDevices.get(routeId)),
+                            PendingIntent.FLAG_UPDATE_CURRENT));
         }
         NotificationManagerCompat.from(mContext).notify("cast_notifications", castNotification.getId(), builder.build());
     }

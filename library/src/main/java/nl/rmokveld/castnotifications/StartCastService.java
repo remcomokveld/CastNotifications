@@ -48,7 +48,6 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         Log.d(getTAG(), "onStartCommand() called with: " + "intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
         mRequestedDevice = new RequestedDevice(intent.getStringExtra(EXTRA_DEVICE_ID), intent.getStringExtra(EXTRA_DEVICE_NAME));
         mCastNotification = intent.getParcelableExtra(EXTRA_NOTIFICATION);
-        mCastNotification.setState(CastNotification.STATE_CONNECTING, mRequestedDevice.getName());
         mCastNotificationManager.cancel(mCastNotification.getId());
         mCastNotificationManager.getNotificationBuilder().buildForConnecting(this, mNotificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), mRequestedDevice.getName());
 

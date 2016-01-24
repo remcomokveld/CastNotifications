@@ -15,8 +15,6 @@ import java.lang.annotation.RetentionPolicy;
 public class CastNotification implements Parcelable {
 
     private static MediaInfoSerializer sMediaInfoSerializer = new DefaultMediaInfoSerializer();
-    public static final int STATE_NORMAL = 0;
-    public static final int STATE_CONNECTING = 1;
     public static final String TABLE_NAME = "Notifications";
     static final String COL_ID = "id";
     private static final String COL_TITLE = "title";
@@ -31,7 +29,6 @@ public class CastNotification implements Parcelable {
     private final int mId;
     private final String mTitle, mContentText;
     private final MediaInfo mMediaInfo;
-    @State private int mState = STATE_NORMAL;
     private String mDeviceName;
 
     public CastNotification(int id, String title, String contentText, @NonNull MediaInfo mediaInfo) {
@@ -52,7 +49,6 @@ public class CastNotification implements Parcelable {
         mTitle = in.readString();
         mContentText = in.readString();
         //noinspection ResourceType
-        mState = in.readInt();
         mDeviceName = in.readString();
         mMediaInfo = sMediaInfoSerializer.toMediaInfo(in.readString());
     }
@@ -66,7 +62,6 @@ public class CastNotification implements Parcelable {
         dest.writeInt(mId);
         dest.writeString(mTitle);
         dest.writeString(mContentText);
-        dest.writeInt(mState);
         dest.writeString(mDeviceName);
         dest.writeString(sMediaInfoSerializer.toJson(mMediaInfo));
     }
@@ -104,20 +99,6 @@ public class CastNotification implements Parcelable {
         return mId;
     }
 
-    public void setState(@State int state, String deviceName) {
-        mState = state;
-        mDeviceName = deviceName;
-    }
-
-    @State
-    public int getState() {
-        return mState;
-    }
-
-    public String getDeviceName() {
-        return mDeviceName;
-    }
-
     public ContentValues toContentValues() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_ID, mId);
@@ -127,8 +108,4 @@ public class CastNotification implements Parcelable {
         return contentValues;
     }
 
-    @IntDef({STATE_NORMAL, STATE_CONNECTING})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface State {
-    }
 }
