@@ -1,7 +1,7 @@
 package nl.rmokveld.castnotifications;
 
 import android.content.Context;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 
 class DefaultNotificationBuilder implements NotificationBuilder {
 
