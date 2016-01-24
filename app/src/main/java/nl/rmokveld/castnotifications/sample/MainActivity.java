@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
                 MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
                 mediaMetadata.putString(MediaMetadata.KEY_TITLE, "test");
                 CastNotificationManager.getInstance().notify(new Random().nextInt(4), "test", "test",
-                        new MediaInfo.Builder("http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8")
+                        new MediaInfo.Builder("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")
                                 .setContentType("video/mp4")
                                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                                 .setMetadata(mediaMetadata)
