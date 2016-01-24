@@ -14,6 +14,7 @@ import java.lang.annotation.RetentionPolicy;
 
 public class CastNotification implements Parcelable {
 
+    private static MediaInfoSerializer sMediaInfoSerializer;
     public static final int STATE_NORMAL = 0;
     public static final int STATE_CONNECTING = 1;
     public static final String TABLE_NAME = "Notifications";
@@ -43,7 +44,7 @@ public class CastNotification implements Parcelable {
         mId = cursor.getInt(cursor.getColumnIndexOrThrow(COL_ID));
         mTitle = cursor.getString(cursor.getColumnIndexOrThrow(COL_TITLE));
         mContentText = cursor.getString(cursor.getColumnIndexOrThrow(COL_TEXT));
-        mMediaInfo = CastNotificationManager.getInstance().getMediaInfoSerializer().toMediaInfo(cursor.getString(cursor.getColumnIndexOrThrow(COL_MEDIA_INFO)));
+        mMediaInfo = sMediaInfoSerializer.toMediaInfo(cursor.getString(cursor.getColumnIndexOrThrow(COL_MEDIA_INFO)));
     }
 
     protected CastNotification(Parcel in) {
@@ -53,7 +54,11 @@ public class CastNotification implements Parcelable {
         //noinspection ResourceType
         mState = in.readInt();
         mDeviceName = in.readString();
-        mMediaInfo = CastNotificationManager.getInstance().getMediaInfoSerializer().toMediaInfo(in.readString());
+        mMediaInfo = sMediaInfoSerializer.toMediaInfo(in.readString());
+    }
+
+    public static void setMediaInfoSerializer(MediaInfoSerializer mediaInfoSerializer) {
+        sMediaInfoSerializer = mediaInfoSerializer;
     }
 
     @Override
@@ -63,7 +68,7 @@ public class CastNotification implements Parcelable {
         dest.writeString(mContentText);
         dest.writeInt(mState);
         dest.writeString(mDeviceName);
-        dest.writeString(CastNotificationManager.getInstance().getMediaInfoSerializer().toJson(mMediaInfo));
+        dest.writeString(sMediaInfoSerializer.toJson(mMediaInfo));
     }
 
     @Override
@@ -118,7 +123,7 @@ public class CastNotification implements Parcelable {
         contentValues.put(COL_ID, mId);
         contentValues.put(COL_TITLE, mTitle);
         contentValues.put(COL_TEXT, mContentText);
-        contentValues.put(COL_MEDIA_INFO, CastNotificationManager.getInstance().getMediaInfoSerializer().toJson(mMediaInfo));
+        contentValues.put(COL_MEDIA_INFO, sMediaInfoSerializer.toJson(mMediaInfo));
         return contentValues;
     }
 

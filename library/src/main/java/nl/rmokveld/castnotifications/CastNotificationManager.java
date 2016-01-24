@@ -36,7 +36,6 @@ public class CastNotificationManager {
     private final Map<MediaRouter.RouteInfo, CastDevice> mAvailableRoutes = new HashMap<>();
     private final SparseArray<CastNotification> mCastNotifications = new SparseArray<>();
     private final Set<OnRouteAddedListener> mOnRouteAddedListeners = new HashSet<>();
-    private MediaInfoSerializer mMediaInfoSerializer = new DefaultMediaInfoSerializer();
     private NotificationBuilder mNotificationBuilder = new DefaultNotificationBuilder();
     private OnApplicationConnectedListener mOnApplicationConnectedListener;
 
@@ -119,12 +118,7 @@ public class CastNotificationManager {
 
     @SuppressWarnings("unused")
     public void setCustomMediaInfoSerializer(MediaInfoSerializer mediaInfoSerializer) {
-        mMediaInfoSerializer = mediaInfoSerializer;
-    }
-
-    @NonNull
-    public MediaInfoSerializer getMediaInfoSerializer() {
-        return mMediaInfoSerializer;
+        CastNotification.setMediaInfoSerializer(mediaInfoSerializer);
     }
 
     @SuppressWarnings("unused")
