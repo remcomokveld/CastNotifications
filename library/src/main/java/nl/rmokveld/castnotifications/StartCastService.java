@@ -6,6 +6,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
@@ -118,6 +119,21 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         mRequestedDevice = null;
         stopDiscovery();
         stopSelf();
+    }
+
+    @Override
+    protected void onDiscoveryTimeout() {
+        if (mRequestedDevice != null) {
+            // discovery failed
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+            mCastNotificationManager.getNotificationBuilder().buildForError(
+                    this, builder, mCastNotification.getId(),
+                    getString(R.string.cast_notifications_failed_title),
+                    getString(R.string.cast_ncast_notifications_failed_text));
+            stopForeground(true);
+            NotificationManagerCompat.from(this).notify(mCastNotification.getId(), builder.build());
+            stopSelf();
+        }
     }
 
     @Nullable
