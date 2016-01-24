@@ -1,13 +1,19 @@
 package nl.rmokveld.castnotifications;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.common.images.WebImage;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Calendar;
+import java.util.Iterator;
 
 public class DefaultMediaInfoSerializer implements MediaInfoSerializer {
     @Override
@@ -15,7 +21,7 @@ public class DefaultMediaInfoSerializer implements MediaInfoSerializer {
         try {
             return toMediaInfo(new JSONObject(json));
         } catch (JSONException e) {
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -38,7 +44,30 @@ public class DefaultMediaInfoSerializer implements MediaInfoSerializer {
         MediaMetadata mediaMetadata = null;
         if (metaData != null) {
             mediaMetadata = new MediaMetadata(metaData.getInt("mediaType"));
-            mediaMetadata.putString(MediaMetadata.KEY_TITLE, metaData.getString("title"));
+
+            Iterator<String> keys = metaData.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if ("images".equals(key) || "mediaType".equals(key)) continue;
+                Object value = metaData.get(key);
+                if (value instanceof String)
+                    mediaMetadata.putString(key, (String) value);
+                else if (value instanceof Integer) {
+                    mediaMetadata.putInt(key, (Integer) value);
+                } else if (value instanceof Double) {
+                    mediaMetadata.putDouble(key, (Double) value);
+                } else if (value instanceof Long) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis((Long) value);
+                    mediaMetadata.putDate(key, calendar);
+                }
+            }
+
+            JSONArray images = metaData.getJSONArray("images");
+            for (int i = 0; i < images.length(); i++) {
+                JSONObject webImageJSON = images.getJSONObject(i);
+                mediaMetadata.addImage(new WebImage(Uri.parse(webImageJSON.getString("url")), webImageJSON.getInt("width"), webImageJSON.getInt("height")));
+            }
         }
         return mediaMetadata;
     }
@@ -48,7 +77,7 @@ public class DefaultMediaInfoSerializer implements MediaInfoSerializer {
         try {
             return toJSONObject(mediaInfo).toString();
         } catch (JSONException e) {
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -69,7 +98,32 @@ public class DefaultMediaInfoSerializer implements MediaInfoSerializer {
         JSONObject metaData = new JSONObject();
         if (metadata != null) {
             metaData.put("mediaType", metadata.getMediaType());
-            metaData.put("title", metadata.getString(MediaMetadata.KEY_TITLE));
+            for (String key : metadata.keySet()) {
+                try {
+                    metaData.put(key, metadata.getString(key));
+                    continue;
+                } catch (IllegalArgumentException ignored) {}
+                try {
+                    metaData.put(key, metadata.getInt(key));
+                    continue;
+                } catch (IllegalArgumentException ignored) {}
+                try {
+                    metaData.put(key, metadata.getDouble(key));
+                    continue;
+                } catch (IllegalArgumentException ignored) {}
+                try {
+                    metaData.put(key, metadata.getDate(key).getTimeInMillis());
+                } catch (IllegalArgumentException ignored) {}
+            }
+            JSONArray images = new JSONArray();
+            for (WebImage webImage : metadata.getImages()) {
+                JSONObject webImageJSON = new JSONObject();
+                webImageJSON.put("url", webImage.getUrl().toString());
+                webImageJSON.put("width", webImage.getWidth());
+                webImageJSON.put("height", webImage.getHeight());
+                images.put(webImageJSON);
+            }
+            metaData.put("images", images);
         }
         return metaData;
     }
