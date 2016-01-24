@@ -35,8 +35,13 @@ public class DiscoveryService extends BaseCastService {
     }
 
     @Override
+    public String getTAG() {
+        return TAG;
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand() called with: " + "intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
+        Log.d(getTAG(), "onStartCommand() called with: " + "intent = [" + intent + "], flags = [" + flags + "], startId = [" + startId + "]");
         if (ACTION_START.equals(intent.getAction())) {
             if (!DeviceStateHelper.isWifiConnected(this)) {
                 stopDiscovery();
@@ -52,25 +57,25 @@ public class DiscoveryService extends BaseCastService {
 
     @Override
     protected void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo routeInfo) {
-        Log.d(TAG, "onRouteAdded() called with: " + "router = [" + router + "], routeInfo = [" + routeInfo + "]");
+        Log.d(getTAG(), "onRouteAdded() called with: " + "router = [" + router + "], routeInfo = [" + routeInfo + "]");
         mCastNotificationManager.getMediaRouterCallback().onRouteAdded(router, routeInfo);
     }
 
     @Override
     protected void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-        Log.d(TAG, "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "]");
+        Log.d(getTAG(), "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "]");
         mCastNotificationManager.getMediaRouterCallback().onRouteRemoved(router, route);
     }
 
     @Override
     protected void onDiscoveryTimeout() {
-        Log.d(TAG, "onDiscoveryTimeout() called with: " + "");
+        Log.d(getTAG(), "onDiscoveryTimeout() called with: " + "");
         stopSelf();
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy() called with: " + "");
+        Log.d(getTAG(), "onDestroy() called with: " + "");
         mCastNotificationManager.setDiscoveryAlarm();
         super.onDestroy();
     }

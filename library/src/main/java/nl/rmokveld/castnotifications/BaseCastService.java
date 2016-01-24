@@ -41,7 +41,7 @@ public abstract class BaseCastService extends Service {
     }
 
     protected void startDiscovery(boolean withWakeLock, long timeout) {
-        Log.d(TAG, "startDiscovery() called with: " + "withWakeLock = [" + withWakeLock + "], timeout = [" + timeout + "]");
+        Log.d(getTAG(), "startDiscovery() called with: " + "withWakeLock = [" + withWakeLock + "], timeout = [" + timeout + "]");
         mTimeoutHandler.removeCallbacksAndMessages(null);
         if (withWakeLock) {
             acquireWakeLocks();
@@ -51,7 +51,7 @@ public abstract class BaseCastService extends Service {
     }
 
     protected void resetTimeout(long timeout) {
-        Log.d(TAG, "resetTimeout() called with: " + "timeout = [" + timeout + "]");
+        Log.d(getTAG(), "resetTimeout() called with: " + "timeout = [" + timeout + "]");
         mTimeoutHandler.removeCallbacksAndMessages(null);
         if (timeout > 0) {
             mTimeoutHandler.postDelayed(new Runnable() {
@@ -68,28 +68,32 @@ public abstract class BaseCastService extends Service {
 
     }
 
+    protected String getTAG() {
+        return TAG;
+    }
+
     protected void stopDiscovery() {
-        Log.d(TAG, "stopDiscovery() called with: " + "");
+        Log.d(getTAG(), "stopDiscovery() called with: " + "");
         mMediaRouter.removeCallback(mCallback);
         mTimeoutHandler.removeCallbacksAndMessages(null);
         releaseWakeLocks();
     }
 
     protected void acquireWakeLocks() {
-        Log.d(TAG, "acquireWakeLocks() called with: " + "");
+        Log.d(getTAG(), "acquireWakeLocks() called with: " + "");
         mWifiLock.acquire();
         mWakeLock.acquire();
     }
 
     protected void releaseWakeLocks() {
-        Log.d(TAG, "releaseWakeLocks() called with: " + "");
+        Log.d(getTAG(), "releaseWakeLocks() called with: " + "");
         if (mWifiLock.isHeld()) mWifiLock.release();
         if (mWakeLock.isHeld()) mWakeLock.release();
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy() called with: " + "");
+        Log.d(getTAG(), "onDestroy() called with: " + "");
         super.onDestroy();
         mMediaRouter.removeCallback(mCallback);
         mTimeoutHandler.removeCallbacksAndMessages(null);
@@ -99,6 +103,6 @@ public abstract class BaseCastService extends Service {
     protected abstract void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo routeInfo);
 
     protected void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-        Log.d(TAG, "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "]");
+        Log.d(getTAG(), "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "]");
     }
 }
