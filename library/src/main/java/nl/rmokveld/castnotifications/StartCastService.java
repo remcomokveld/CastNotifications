@@ -2,9 +2,7 @@ package nl.rmokveld.castnotifications;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
@@ -13,7 +11,6 @@ import android.support.v7.media.MediaRouter;
 import android.util.Log;
 
 import com.google.android.gms.cast.CastDevice;
-import com.google.android.gms.cast.MediaInfo;
 
 public class StartCastService extends BaseCastService implements CastNotificationManager.OnApplicationConnectedListener, CastNotificationManager.OnRouteAddedListener {
 

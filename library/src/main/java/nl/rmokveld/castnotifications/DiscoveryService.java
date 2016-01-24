@@ -2,13 +2,8 @@ package nl.rmokveld.castnotifications;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
-import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.support.annotation.Nullable;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
 
