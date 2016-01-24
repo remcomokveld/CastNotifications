@@ -191,7 +191,7 @@ public class CastNotificationManager {
     private void postNotification(CastNotification castNotification, Map<String, String> castDevices) {
         Log.d(TAG, "postNotification() called with: " + "castNotification = [" + castNotification + "], castDevices = [" + castDevices + "]");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-        CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, castNotification, builder);
+        CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castDevices.size() > 0);
         builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, new Intent(mContext, NotificationDeletedReceiver.class).setData(Uri.parse("content://" + BuildConfig.APPLICATION_ID + "/notifications/" + castNotification.getId())), PendingIntent.FLAG_UPDATE_CURRENT));
         if (castNotification.getState() == CastNotification.STATE_NORMAL) {
             for (String routeId : castDevices.keySet()) {

@@ -50,7 +50,7 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         mCastNotification = intent.getParcelableExtra(EXTRA_NOTIFICATION);
         mCastNotification.setState(CastNotification.STATE_CONNECTING, mRequestedDevice.getName());
         mCastNotificationManager.cancel(mCastNotification.getId());
-        mCastNotificationManager.getNotificationBuilder().build(this, mCastNotification, mNotificationBuilder);
+        mCastNotificationManager.getNotificationBuilder().buildForConnecting(this, mNotificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), mRequestedDevice.getName());
 
         acquireWakeLocks();
         startForeground(mCastNotification.getId(), mNotificationBuilder.build());

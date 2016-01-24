@@ -2,4 +2,6 @@
     <string name="app_name">CastNotifications</string>
     <string name="cast_notifications_connecting">"Connecting to %1$s"</string>
     <string name="cast_notifications_discovering">Searching for Cast devices</string>
+    <string name="cast_notifications_failed_title">Verbinden met %1$s mislukt</string>
+    <string name="cast_ncast_notifications_failed_text">Open de app om opnieuw te proberen</string>
 </resources>

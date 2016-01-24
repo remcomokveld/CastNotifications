@@ -61,14 +61,24 @@ public class SampleApp extends Application {
             }
         });
         CastNotificationManager.getInstance().setCustomNotificationBuilder(new NotificationBuilder() {
+
             @Override
-            public void build(Context context, CastNotification castNotification, NotificationCompat.Builder builder) {
-                builder.setSmallIcon(R.drawable.ic_audiotrack);
-                builder.setContentTitle(castNotification.getTitle());
-                if (castNotification.getState() == CastNotification.STATE_NORMAL)
-                    builder.setContentText(castNotification.getContentText());
-                else
-                    builder.setContentText(getString(R.string.cast_notifications_connecting, castNotification.getDeviceName()));
+            public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, boolean castDevicesAvailable) {
+                builder.setSmallIcon(R.drawable.ic_audiotrack)
+                        .setContentTitle(title);
+                if (subtitle != null)
+                    builder.setContentText(subtitle);
+            }
+
+            @Override
+            public void buildForConnecting(Context context, NotificationCompat.Builder builder, int id, String title, String deviceName) {
+                build(context, builder, id, title, null, true);
+                builder.setContentText(getString(R.string.cast_notifications_connecting, deviceName));
+            }
+
+            @Override
+            public void buildForError(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle) {
+
             }
         });
         instance.addVideoCastConsumer(new VideoCastConsumerImpl() {
