@@ -2,6 +2,8 @@ package nl.rmokveld.castnotifications;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 
@@ -10,7 +12,7 @@ import com.google.android.gms.cast.MediaInfo;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class CastNotification {
+public class CastNotification implements Parcelable {
 
     public static final int STATE_NORMAL = 0;
     public static final int STATE_CONNECTING = 1;
@@ -43,6 +45,43 @@ public class CastNotification {
         mContentText = cursor.getString(cursor.getColumnIndexOrThrow(COL_TEXT));
         mMediaInfo = CastNotificationManager.getInstance().getMediaInfoSerializer().toMediaInfo(cursor.getString(cursor.getColumnIndexOrThrow(COL_MEDIA_INFO)));
     }
+
+    protected CastNotification(Parcel in) {
+        mId = in.readInt();
+        mTitle = in.readString();
+        mContentText = in.readString();
+        //noinspection ResourceType
+        mState = in.readInt();
+        mDeviceName = in.readString();
+        mMediaInfo = CastNotificationManager.getInstance().getMediaInfoSerializer().toMediaInfo(in.readString());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
+        dest.writeString(mTitle);
+        dest.writeString(mContentText);
+        dest.writeInt(mState);
+        dest.writeString(mDeviceName);
+        dest.writeString(CastNotificationManager.getInstance().getMediaInfoSerializer().toJson(mMediaInfo));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<CastNotification> CREATOR = new Creator<CastNotification>() {
+        @Override
+        public CastNotification createFromParcel(Parcel in) {
+            return new CastNotification(in);
+        }
+
+        @Override
+        public CastNotification[] newArray(int size) {
+            return new CastNotification[size];
+        }
+    };
 
     public String getTitle() {
         return mTitle;
