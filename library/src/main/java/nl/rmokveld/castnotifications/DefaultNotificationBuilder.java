@@ -2,14 +2,17 @@ package nl.rmokveld.castnotifications;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+
+import org.json.JSONObject;
 
 public class DefaultNotificationBuilder implements NotificationBuilder {
 
     private boolean mSearchActionOnWear = true;
 
     @Override
-    public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, boolean castDevicesAvailable) {
+    public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, @Nullable JSONObject customData, boolean castDevicesAvailable) {
         builder.setContentTitle(title)
                 .setSmallIcon(R.drawable.ic_cast_dark)
                 .setAutoCancel(true)
@@ -26,15 +29,15 @@ public class DefaultNotificationBuilder implements NotificationBuilder {
     }
 
     @Override
-    public void buildForConnecting(Context context, NotificationCompat.Builder builder, int id, String title, String deviceName) {
-        build(context, builder, id, title, null, true);
+    public void buildForConnecting(Context context, NotificationCompat.Builder builder, int id, String title, @Nullable JSONObject customData, String deviceName) {
+        build(context, builder, id, title, null, customData, true);
         builder.setContentText(context.getString(R.string.cast_notifications_connecting, deviceName));
     }
 
     @Override
-    public void buildForError(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle) {
+    public void buildForError(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, @Nullable JSONObject customData) {
         mSearchActionOnWear = false;
-        build(context, builder, id, title, subtitle, false);
+        build(context, builder, id, title, subtitle, customData, false);
         mSearchActionOnWear = true;
     }
 
