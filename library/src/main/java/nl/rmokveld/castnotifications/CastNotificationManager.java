@@ -230,6 +230,4 @@ public class CastNotificationManager {
         void onApplicationConnected();
     }
 
-    interface OnRouteAddedListener {
-    }
 }

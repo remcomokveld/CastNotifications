@@ -13,7 +13,7 @@ import android.util.Log;
 
 import com.google.android.gms.cast.CastDevice;
 
-public class StartCastService extends BaseCastService implements CastNotificationManager.OnApplicationConnectedListener, CastNotificationManager.OnRouteAddedListener {
+public class StartCastService extends BaseCastService implements CastNotificationManager.OnApplicationConnectedListener {
 
     private static final String EXTRA_NOTIFICATION = "notification_id";
     private static final String EXTRA_DEVICE_ID = "device_id";
