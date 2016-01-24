@@ -4,7 +4,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 
-class DefaultNotificationBuilder implements NotificationBuilder {
+public class DefaultNotificationBuilder implements NotificationBuilder {
 
     private boolean mSearchActionOnWear = true;
 
