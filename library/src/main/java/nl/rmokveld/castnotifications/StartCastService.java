@@ -127,7 +127,7 @@ public class StartCastService extends BaseCastService implements CastNotificatio
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
             mCastNotificationManager.getNotificationBuilder().buildForError(
                     this, builder, mCastNotification.getId(),
-                    getString(R.string.cast_notifications_failed_title),
+                    getString(R.string.cast_notifications_failed_title, mRequestedDevice.getName()),
                     getString(R.string.cast_ncast_notifications_failed_text), System.currentTimeMillis(), mCastNotification.getCustomData());
             stopForeground(true);
             NotificationManagerCompat.from(this).notify(mCastNotification.getId(), builder.build());
