@@ -1,7 +1,8 @@
 package nl.rmokveld.castnotifications;
 
+import android.content.ComponentName;
 import android.content.Context;
-import android.net.wifi.WifiManager;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -38,8 +39,12 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
         if (!mAvailableRoutes.containsKey(route.getId())) {
             mHandler.removeCallbacksAndMessages(route.getId());
             mAvailableRoutes.put(route.getId(), castDevice.getFriendlyName());
-            onRoutesChanged(mAvailableRoutes);
+            notifyRoutesChanged();
         }
+    }
+
+    private void notifyRoutesChanged() {
+        onRoutesChanged(DeviceStateHelper.isWifiConnected(mContext) ? mAvailableRoutes : null);
     }
 
     @Override
@@ -61,8 +66,7 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
     @Override
     public void onWifiDisconnected() {
         mHandler.removeCallbacksAndMessages(null);
-        mAvailableRoutes.clear();
-        onRoutesChanged(mAvailableRoutes);
+        notifyRoutesChanged();
     }
 
     @Override
@@ -100,10 +104,13 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
         } else {
             DiscoveryService.stop(mContext);
         }
+        int newState = mHasActiveNotifications ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        mContext.getPackageManager().setComponentEnabledSetting(new ComponentName(mContext, WifiStateReceiver.class), newState, PackageManager.DONT_KILL_APP);
+        mContext.getPackageManager().setComponentEnabledSetting(new ComponentName(mContext, ScreenStateReceiver.class), newState, PackageManager.DONT_KILL_APP);
     }
 
     public Map<String, String> getAvailableRoutes() {
-        return mAvailableRoutes;
+        return DeviceStateHelper.isWifiConnected(mContext) ? mAvailableRoutes : null;
     }
 
     abstract void onRoutesChanged(Map<String, String> availableRoutes);
@@ -126,7 +133,7 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
                 }
             }
             mAvailableRoutes.remove(mRouteId);
-            onRoutesChanged(mAvailableRoutes);
+            notifyRoutesChanged();
         }
     }
 
@@ -144,6 +151,6 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
             }
         }
         if (changed)
-            onRoutesChanged(mAvailableRoutes);
+            notifyRoutesChanged();
     }
 }
