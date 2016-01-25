@@ -39,6 +39,7 @@ public class CastNotificationManager {
         mDiscoveryStrategy = new DiscoveryStrategyImpl(mContext) {
             @Override
             void onRoutesChanged(Map<String, String> availableRoutes) {
+                Log.d(TAG, "onRoutesChanged() called with: " + "availableRoutes = [" + availableRoutes + "]");
                 mNotificationHelper.postNotifications(availableRoutes);
             }
         };
