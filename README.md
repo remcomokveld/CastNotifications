@@ -4,7 +4,8 @@ CastNotifications
 [ ![Download](https://api.bintray.com/packages/rmokveld/maven/cast-notification/images/download.svg) ](https://bintray.com/rmokveld/maven/cast-notification/_latestVersion)
 [![license](https://img.shields.io/hexpm/l/plug.svg)](LICENSE)
 
-https://travis-ci.org/remcomokveld/CastNotifications.svg?branch=master
+[![Build Status](https://travis-ci.org/remcomokveld/CastNotifications.svg?branch=master)](https://travis-ci.com/remcomokveld/CastNotifications)
+
 
 Library for showing system notifications with cast support
 * Easy starting of cast from a notification through notification actions
