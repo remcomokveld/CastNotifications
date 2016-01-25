@@ -55,7 +55,6 @@ public class DiscoveryService extends BaseCastService {
                 stopDiscovery();
                 return START_NOT_STICKY;
             }
-            mCastNotificationManager.refreshRoutes(mMediaRouter);
             if (ACTION_START_WAKEUP.equals(intent.getAction()))
                 acquireWakeLocks();
             startDiscovery(false, DeviceStateHelper.isScreenTurnedOn(this) ? 10000 : 0);
@@ -68,28 +67,10 @@ public class DiscoveryService extends BaseCastService {
     }
 
     @Override
-    protected void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo routeInfo) {
-        Log.d(getTAG(), "onRouteAdded() called with: " + "router = [" + router + "], routeInfo = [" + routeInfo + "]");
-        mCastNotificationManager.getMediaRouterCallback().onRouteAdded(router, routeInfo);
-    }
-
-    @Override
-    protected void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-        Log.d(getTAG(), "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "]");
-        mCastNotificationManager.getMediaRouterCallback().onRouteRemoved(router, route);
-    }
-
-    @Override
     protected void onDiscoveryTimeout() {
         Log.d(getTAG(), "onDiscoveryTimeout() called with: " + "");
+        mCastNotificationManager.getDiscoveryStrategy().onBackgroundDiscoveryStopped();
         stopSelf();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(getTAG(), "onDestroy() called with: " + "");
-        mCastNotificationManager.setDiscoveryAlarm();
-        super.onDestroy();
     }
 
     @Nullable

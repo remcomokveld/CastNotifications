@@ -9,9 +9,9 @@ public class ScreenStateReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
-            CastNotificationManager.getInstance().onScreenTurnedOn();
+            CastNotificationManager.getInstance().getDiscoveryStrategy().onScreenTurnedOn();
         } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-            CastNotificationManager.getInstance().onScreenTurnedOff();
+            CastNotificationManager.getInstance().getDiscoveryStrategy().onScreenTurnedOff();
         }
     }
 }

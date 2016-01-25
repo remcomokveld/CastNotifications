@@ -99,9 +99,12 @@ public abstract class BaseCastService extends Service {
         releaseWakeLocks();
     }
 
-    protected abstract void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo routeInfo);
+    protected void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
+        Log.d(getTAG(), "onRouteAdded() called with: " + "router = [" + router + "], route = [" + route + "]");
+    }
 
     protected void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
         Log.d(getTAG(), "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "]");
+        mCastNotificationManager.getDiscoveryStrategy().onRouteRemoved(router, route, true);
     }
 }

@@ -69,7 +69,7 @@ class CastNotification implements Parcelable {
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(in.readString());
-        } catch (JSONException ignored) {}
+        } catch (Exception ignored) {}
         mCustomData = jsonObject;
     }
 

@@ -96,7 +96,7 @@ public class StartCastService extends BaseCastService implements CastNotificatio
                     }
                     mMediaRouter.removeCallback(this);
                 }
-            });
+            }, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
             mRequestedDevice.getRouteInfo().select();
         } else {
             if (!mCastNotificationManager.getCastCompanionInterface().isApplicationConnected()) {

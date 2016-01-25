@@ -50,10 +50,17 @@ class NotificationDatabase extends SQLiteOpenHelper {
     }
 
     public void getCastNotifications(final Callback callback) {
+        final Handler callingHandler = new Handler();
         mDbHandler.post(new Runnable() {
             @Override
             public void run() {
-                callback.onComplete(getCastNotifications());
+                final List<CastNotification> castNotifications = getCastNotifications();
+                callingHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onComplete(castNotifications);
+                    }
+                });
             }
         });
     }
@@ -84,6 +91,16 @@ class NotificationDatabase extends SQLiteOpenHelper {
                 } finally {
                     database.endTransaction();
                 }
+            }
+        });
+    }
+
+    public void persistNotification(final CastNotification notification) {
+        mDbHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                SQLiteDatabase database = getWritableDatabase();
+                database.replace(CastNotification.TABLE_NAME, null, notification.toContentValues());
             }
         });
     }
