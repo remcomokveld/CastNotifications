@@ -67,8 +67,8 @@ public class SampleApp extends Application {
         CastNotificationManager.getInstance().setCustomNotificationBuilder(new DefaultNotificationBuilder() {
 
             @Override
-            public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, @Nullable JSONObject customData, boolean castDevicesAvailable) {
-                super.build(context, builder, id, title, subtitle, customData, castDevicesAvailable);
+            public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData, boolean castDevicesAvailable) {
+                super.build(context, builder, id, title, subtitle, when, customData, castDevicesAvailable);
                 builder.setSmallIcon(R.drawable.ic_audiotrack);
             }
         });

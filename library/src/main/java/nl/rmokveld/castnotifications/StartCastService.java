@@ -49,7 +49,7 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         mRequestedDevice = new RequestedDevice(intent.getStringExtra(EXTRA_DEVICE_ID), intent.getStringExtra(EXTRA_DEVICE_NAME));
         mCastNotification = intent.getParcelableExtra(EXTRA_NOTIFICATION);
         mCastNotificationManager.cancel(mCastNotification.getId());
-        mCastNotificationManager.getNotificationBuilder().buildForConnecting(this, mNotificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), mCastNotification.getCustomData(), mRequestedDevice.getName());
+        mCastNotificationManager.getNotificationBuilder().buildForConnecting(this, mNotificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), System.currentTimeMillis(), mCastNotification.getCustomData(), mRequestedDevice.getName());
 
         acquireWakeLocks();
         startForeground(mCastNotification.getId(), mNotificationBuilder.build());
@@ -128,7 +128,7 @@ public class StartCastService extends BaseCastService implements CastNotificatio
             mCastNotificationManager.getNotificationBuilder().buildForError(
                     this, builder, mCastNotification.getId(),
                     getString(R.string.cast_notifications_failed_title),
-                    getString(R.string.cast_ncast_notifications_failed_text), mCastNotification.getCustomData());
+                    getString(R.string.cast_ncast_notifications_failed_text), System.currentTimeMillis(), mCastNotification.getCustomData());
             stopForeground(true);
             NotificationManagerCompat.from(this).notify(mCastNotification.getId(), builder.build());
             stopSelf();

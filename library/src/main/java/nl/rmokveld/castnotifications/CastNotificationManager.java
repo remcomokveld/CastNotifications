@@ -89,7 +89,7 @@ public class CastNotificationManager {
 
     public void notify(int id, String title, String contentText, @NonNull MediaInfo mediaInfo, @Nullable JSONObject customData) {
         Log.d(TAG, "notify() called with: " + "id = [" + id + "], title = [" + title + "], contentText = [" + contentText + "], mediaInfo = [" + mediaInfo + "]");
-        CastNotification notification = new CastNotification(id, title, contentText, mediaInfo, customData);
+        CastNotification notification = new CastNotification(id, title, contentText, System.currentTimeMillis(), mediaInfo, customData);
         mCastNotifications.put(id, notification);
         persistNotifications();
         postNotification(notification, mCastAvailabilityHelper.getAvailableRoutes());
@@ -201,7 +201,7 @@ public class CastNotificationManager {
     private void postNotification(CastNotification castNotification, Map<String, String> castDevices) {
         Log.d(TAG, "postNotification() called with: " + "castNotification = [" + castNotification + "], castDevices = [" + castDevices + "]");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-        CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castNotification.getCustomData(), castDevices.size() > 0);
+        CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castNotification.getTimestamp(), castNotification.getCustomData(), castDevices.size() > 0);
         builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, new Intent(mContext, NotificationDeletedReceiver.class).setData(Uri.parse("content://" + BuildConfig.APPLICATION_ID + "/notifications/" + castNotification.getId())), PendingIntent.FLAG_UPDATE_CURRENT));
         for (String routeId : castDevices.keySet()) {
             builder.addAction(R.drawable.ic_cast_light, castDevices.get(routeId),

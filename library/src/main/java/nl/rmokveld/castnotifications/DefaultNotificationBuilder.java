@@ -12,10 +12,11 @@ public class DefaultNotificationBuilder implements NotificationBuilder {
     private boolean mSearchActionOnWear = true;
 
     @Override
-    public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, @Nullable JSONObject customData, boolean castDevicesAvailable) {
+    public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData, boolean castDevicesAvailable) {
         builder.setContentTitle(title)
                 .setSmallIcon(R.drawable.ic_cast_dark)
                 .setAutoCancel(true)
+                .setWhen(when)
                 .setOnlyAlertOnce(true)
                 .setDefaults(NotificationCompat.DEFAULT_ALL);
         if (mSearchActionOnWear && !castDevicesAvailable) {
@@ -29,15 +30,15 @@ public class DefaultNotificationBuilder implements NotificationBuilder {
     }
 
     @Override
-    public void buildForConnecting(Context context, NotificationCompat.Builder builder, int id, String title, @Nullable JSONObject customData, String deviceName) {
-        build(context, builder, id, title, null, customData, true);
+    public void buildForConnecting(Context context, NotificationCompat.Builder builder, int id, String title, long when, @Nullable JSONObject customData, String deviceName) {
+        build(context, builder, id, title, null, when, customData, true);
         builder.setContentText(context.getString(R.string.cast_notifications_connecting, deviceName));
     }
 
     @Override
-    public void buildForError(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, @Nullable JSONObject customData) {
+    public void buildForError(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData) {
         mSearchActionOnWear = false;
-        build(context, builder, id, title, subtitle, customData, false);
+        build(context, builder, id, title, subtitle, when, customData, false);
         mSearchActionOnWear = true;
     }
 
