@@ -37,8 +37,7 @@ class NotificationHelperImpl implements NotificationHelper {
         postNotifications(availableRoutes);
     }
 
-    @Override
-    public void postNotification(CastNotification castNotification, @Nullable Map<String, String> castDevices) {
+    private void postNotification(CastNotification castNotification, @Nullable Map<String, String> castDevices) {
         Log.d(TAG, "postNotification() called with: " + "castNotification = [" + castNotification + "], castDevices = [" + castDevices + "]");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
         CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castNotification.getTimestamp(), castNotification.getCustomData(), castDevices != null && castDevices.size() > 0);
