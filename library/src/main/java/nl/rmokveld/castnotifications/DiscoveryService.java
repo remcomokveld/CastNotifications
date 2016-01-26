@@ -1,25 +1,28 @@
 package nl.rmokveld.castnotifications;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v7.media.MediaRouter;
+import android.support.v4.content.LocalBroadcastManager;
 
 public class DiscoveryService extends BaseCastService {
 
     private static final String TAG = "DiscoveryService";
     private static final String ACTION_START = BuildConfig.APPLICATION_ID + ".action.START_DISCOVERY";
     private static final String ACTION_START_WAKEUP = BuildConfig.APPLICATION_ID + ".action.START_DISCOVERY_WAKEUP";
-    private static final String ACTION_REMOVE_TIMEOUT = BuildConfig.APPLICATION_ID + ".action_REMOVE_TIMEOUT";
     private static final String ACTION_SET_TIMEOUT = BuildConfig.APPLICATION_ID + ".action_SET_TIMEOUT";
+    private BroadcastReceiver mTimeoutBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            resetTimeout(intent.getLongExtra("timeout", 0));
+        }
+    };
 
     public static void start(Context context, String tag) {
-        context.startService(buildIntent(context, tag));
-    }
-
-    static Intent buildIntent(Context context, String tag) {
-        return buildIntent(context, false, tag);
+        context.startService(buildIntent(context, false, tag));
     }
 
     static Intent buildIntent(Context context, boolean wakeup, String tag) {
@@ -34,17 +37,23 @@ public class DiscoveryService extends BaseCastService {
 
     public static void removeTimeout(Context context) {
         Log.d(TAG, "removeTimeout() called with: " + "context = [" + context + "]");
-        context.startService(new Intent(context, DiscoveryService.class).setAction(ACTION_REMOVE_TIMEOUT));
+        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ACTION_SET_TIMEOUT).putExtra("timeout", 0));
     }
 
     public static void setTimeout(Context context) {
         Log.d(TAG, "setTimeout() called with: " + "context = [" + context + "]");
-        context.startService(new Intent(context, DiscoveryService.class).setAction(ACTION_SET_TIMEOUT));
+        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ACTION_SET_TIMEOUT).putExtra("timeout", 10000));
     }
 
     @Override
     public String getTAG() {
         return TAG;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mTimeoutBroadcastReceiver, new IntentFilter(ACTION_SET_TIMEOUT));
     }
 
     @Override
@@ -58,10 +67,6 @@ public class DiscoveryService extends BaseCastService {
             if (ACTION_START_WAKEUP.equals(intent.getAction()))
                 acquireWakeLocks();
             startDiscovery(false, DeviceStateHelper.isScreenTurnedOn(this) ? 10000 : 0);
-        } else if (ACTION_REMOVE_TIMEOUT.equals(intent.getAction())) {
-            resetTimeout(0);
-        } else if (ACTION_SET_TIMEOUT.equals(intent.getAction())) {
-            resetTimeout(10000);
         }
         return START_REDELIVER_INTENT;
     }
@@ -71,6 +76,12 @@ public class DiscoveryService extends BaseCastService {
         Log.d(getTAG(), "onDiscoveryTimeout() called with: " + "");
         mCastNotificationManager.getDiscoveryStrategy().onBackgroundDiscoveryStopped();
         stopSelf();
+    }
+
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mTimeoutBroadcastReceiver);
+        super.onDestroy();
     }
 
     @Nullable
