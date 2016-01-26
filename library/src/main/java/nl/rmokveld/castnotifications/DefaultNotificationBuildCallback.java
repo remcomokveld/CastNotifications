@@ -7,12 +7,12 @@ import android.support.v4.app.NotificationCompat;
 
 import org.json.JSONObject;
 
-public class DefaultNotificationBuilder implements NotificationBuilder {
+public class DefaultNotificationBuildCallback implements NotificationBuildCallback {
 
     private boolean mSearchActionOnWear = true;
 
     @Override
-    public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData, boolean castDevicesAvailable) {
+    public void onBuild(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData, boolean castDevicesAvailable) {
         builder.setContentTitle(title)
                 .setSmallIcon(R.drawable.ic_cast_dark)
                 .setAutoCancel(true)
@@ -30,15 +30,15 @@ public class DefaultNotificationBuilder implements NotificationBuilder {
     }
 
     @Override
-    public void buildForConnecting(Context context, NotificationCompat.Builder builder, int id, String title, long when, @Nullable JSONObject customData, String deviceName) {
-        build(context, builder, id, title, null, when, customData, true);
+    public void onBuildForConnecting(Context context, NotificationCompat.Builder builder, int id, String title, long when, @Nullable JSONObject customData, String deviceName) {
+        onBuild(context, builder, id, title, null, when, customData, true);
         builder.setContentText(context.getString(R.string.cast_notifications_connecting, deviceName));
     }
 
     @Override
-    public void buildForError(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData) {
+    public void onBuildForError(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData) {
         mSearchActionOnWear = false;
-        build(context, builder, id, title, subtitle, when, customData, false);
+        onBuild(context, builder, id, title, subtitle, when, customData, false);
         mSearchActionOnWear = true;
     }
 

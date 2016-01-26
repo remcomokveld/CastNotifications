@@ -2,8 +2,6 @@ package nl.rmokveld.castnotifications;
 
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.NotificationCompat;
@@ -48,8 +46,8 @@ class NotificationHelperImpl implements NotificationHelper {
     private void postNotification(CastNotification castNotification, @Nullable Map<String, String> castDevices) {
         if (!mNotificationChangeHelper.shouldPostNotifications()) return;
         Log.d(TAG, "postNotification() called with: " + "castNotification = [" + castNotification + "], castDevices = [" + castDevices + "]");
-        NotificationCompat.Builder builder = new NotificationBuilder.Builder(mContext, castNotification.getId());
-        CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castNotification.getTimestamp(), castNotification.getCustomData(), castDevices != null && castDevices.size() > 0);
+        NotificationCompat.Builder builder = new NotificationCompatBuilder(mContext, castNotification.getId());
+        CastNotificationManager.getInstance().getNotificationBuildCallback().onBuild(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castNotification.getTimestamp(), castNotification.getCustomData(), castDevices != null && castDevices.size() > 0);
         builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, castNotification.getId(), NotificationDeletedReceiver.getDeleteIntent(mContext, castNotification.getId()), PendingIntent.FLAG_UPDATE_CURRENT));
         if (castDevices != null) {
             for (String routeId : castDevices.keySet()) {

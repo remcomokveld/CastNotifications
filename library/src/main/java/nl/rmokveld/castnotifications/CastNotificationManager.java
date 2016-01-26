@@ -24,7 +24,7 @@ public class CastNotificationManager {
     private final Context mContext;
 
     private final CastCompanionInterface mCastCompanionInterface;
-    private NotificationBuilder mNotificationBuilder = new DefaultNotificationBuilder();
+    private NotificationBuildCallback mNotificationBuildCallback = new DefaultNotificationBuildCallback();
 
     private final DiscoveryStrategy mDiscoveryStrategy;
     private final NotificationHelper mNotificationHelper;
@@ -118,12 +118,12 @@ public class CastNotificationManager {
     }
 
     @SuppressWarnings("unused")
-    public void setCustomNotificationBuilder(NotificationBuilder notificationBuilder) {
-        mNotificationBuilder = notificationBuilder;
+    public void setCustomNotificationBuildCallback(NotificationBuildCallback callback) {
+        mNotificationBuildCallback = callback;
     }
 
-    NotificationBuilder getNotificationBuilder() {
-        return mNotificationBuilder;
+    NotificationBuildCallback getNotificationBuildCallback() {
+        return mNotificationBuildCallback;
     }
 
     DiscoveryStrategy getDiscoveryStrategy() {

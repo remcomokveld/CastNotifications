@@ -47,8 +47,8 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         mRequestedDevice = new RequestedDevice(intent.getStringExtra(EXTRA_DEVICE_ID), intent.getStringExtra(EXTRA_DEVICE_NAME));
         mCastNotification = intent.getParcelableExtra(EXTRA_NOTIFICATION);
         mCastNotificationManager.cancel(mCastNotification.getId());
-        NotificationCompat.Builder notificationBuilder = new NotificationBuilder.Builder(this, mCastNotification.getId());
-        mCastNotificationManager.getNotificationBuilder().buildForConnecting(this, notificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), System.currentTimeMillis(), mCastNotification.getCustomData(), mRequestedDevice.getName());
+        NotificationCompat.Builder notificationBuilder = new NotificationCompatBuilder(this, mCastNotification.getId());
+        mCastNotificationManager.getNotificationBuildCallback().onBuildForConnecting(this, notificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), System.currentTimeMillis(), mCastNotification.getCustomData(), mRequestedDevice.getName());
 
         acquireWakeLocks();
         startForeground(mCastNotification.getId(), notificationBuilder.build());
@@ -123,8 +123,8 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         Log.d(TAG, "onDiscoveryTimeout() called with: " + "");
         if (mRequestedDevice != null) {
             // discovery failed
-            NotificationCompat.Builder builder = new NotificationBuilder.Builder(this, mCastNotification.getId());
-            mCastNotificationManager.getNotificationBuilder().buildForError(
+            NotificationCompat.Builder builder = new NotificationCompatBuilder(this, mCastNotification.getId());
+            mCastNotificationManager.getNotificationBuildCallback().onBuildForError(
                     this, builder, mCastNotification.getId(),
                     getString(R.string.cast_notifications_failed_title, mRequestedDevice.getName()),
                     getString(R.string.cast_ncast_notifications_failed_text), System.currentTimeMillis(), mCastNotification.getCustomData());

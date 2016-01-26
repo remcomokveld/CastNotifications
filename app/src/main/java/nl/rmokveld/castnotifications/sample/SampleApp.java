@@ -20,7 +20,7 @@ import org.json.JSONObject;
 
 import nl.rmokveld.castnotifications.CastCompanionInterface;
 import nl.rmokveld.castnotifications.CastNotificationManager;
-import nl.rmokveld.castnotifications.DefaultNotificationBuilder;
+import nl.rmokveld.castnotifications.DefaultNotificationBuildCallback;
 
 public class SampleApp extends Application {
 
@@ -64,11 +64,11 @@ public class SampleApp extends Application {
             }
         });
         CastNotificationManager.getInstance().setLogLevel(Log.DEBUG);
-        CastNotificationManager.getInstance().setCustomNotificationBuilder(new DefaultNotificationBuilder() {
+        CastNotificationManager.getInstance().setCustomNotificationBuildCallback(new DefaultNotificationBuildCallback() {
 
             @Override
-            public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData, boolean castDevicesAvailable) {
-                super.build(context, builder, id, title, subtitle, when, customData, castDevicesAvailable);
+            public void onBuild(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData, boolean castDevicesAvailable) {
+                super.onBuild(context, builder, id, title, subtitle, when, customData, castDevicesAvailable);
                 builder.setSmallIcon(R.drawable.ic_audiotrack);
             }
         });
