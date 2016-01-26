@@ -50,7 +50,7 @@ class NotificationHelperImpl implements NotificationHelper {
         Log.d(TAG, "postNotification() called with: " + "castNotification = [" + castNotification + "], castDevices = [" + castDevices + "]");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
         CastNotificationManager.getInstance().getNotificationBuilder().build(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castNotification.getTimestamp(), castNotification.getCustomData(), castDevices != null && castDevices.size() > 0);
-        builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, new Intent(mContext, NotificationDeletedReceiver.class).setData(Uri.parse("content://" + BuildConfig.APPLICATION_ID + "/notifications/" + castNotification.getId())), PendingIntent.FLAG_UPDATE_CURRENT));
+        builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, castNotification.getId(), NotificationDeletedReceiver.getDeleteIntent(mContext, castNotification.getId()), PendingIntent.FLAG_UPDATE_CURRENT));
         if (castDevices != null) {
             for (String routeId : castDevices.keySet()) {
                 builder.addAction(R.drawable.ic_cast_light, castDevices.get(routeId),
