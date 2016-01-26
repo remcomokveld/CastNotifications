@@ -21,7 +21,6 @@ public class StartCastService extends BaseCastService implements CastNotificatio
 
     private RequestedDevice mRequestedDevice;
     private CastNotification mCastNotification;
-    private NotificationCompat.Builder mNotificationBuilder;
 
     @NonNull
     public static Intent getIntent(CastNotification castNotification, Context context, String routeId, String deviceName) {
@@ -40,7 +39,6 @@ public class StartCastService extends BaseCastService implements CastNotificatio
     public void onCreate() {
         super.onCreate();
         mCastNotificationManager.addOnApplicationConnectedListener(this);
-        mNotificationBuilder = new NotificationCompat.Builder(this);
     }
 
     @Override
@@ -49,10 +47,11 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         mRequestedDevice = new RequestedDevice(intent.getStringExtra(EXTRA_DEVICE_ID), intent.getStringExtra(EXTRA_DEVICE_NAME));
         mCastNotification = intent.getParcelableExtra(EXTRA_NOTIFICATION);
         mCastNotificationManager.cancel(mCastNotification.getId());
-        mCastNotificationManager.getNotificationBuilder().buildForConnecting(this, mNotificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), System.currentTimeMillis(), mCastNotification.getCustomData(), mRequestedDevice.getName());
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
+        mCastNotificationManager.getNotificationBuilder().buildForConnecting(this, notificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), System.currentTimeMillis(), mCastNotification.getCustomData(), mRequestedDevice.getName());
 
         acquireWakeLocks();
-        startForeground(mCastNotification.getId(), mNotificationBuilder.build());
+        startForeground(mCastNotification.getId(), notificationBuilder.build());
 
         findCastDevice();
 
