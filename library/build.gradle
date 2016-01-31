@@ -53,20 +53,16 @@ dependencies {
     compile project(':firebase_logging')
 }
 
-apply plugin: 'com.novoda.bintray-release' // must be applied after your artifact generating plugin (eg. java / com.android.library)
-
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-        classpath 'com.novoda:bintray-release:0.3.4'
+        classpath 'com.novoda:bintray-release:0.3.6'
     }
 }
 
-import com.novoda.gradle.release.*
-
-version = "0.1"
+apply plugin: 'com.novoda.bintray-release' // must be applied after your artifact generating plugin (eg. java / com.android.library)
 
 publish {
     userOrg = 'rmokveld'
@@ -79,31 +75,4 @@ publish {
     bintrayUser = System.getenv("BINTRAY_USER")
     bintrayKey = System.getenv("BINTRAY_KEY")
     dryRun = false
-
-    publications = ["gms84Support2311Release","gms83Support2311Release","gms75Support2311Release"]
-
 }
-
-project.afterEvaluate {
-    project.publishing.publications.remove(project.publishing.publications.first())
-    project.android.libraryVariants.each { variant ->
-        if (variant.buildType.name == "debug") return;
-        Artifacts artifacts = project.plugins.hasPlugin('com.android.library') ? new AndroidArtifacts() : new JavaArtifacts()
-
-        project.publishing.publications.create(variant.name, MavenPublication) {
-            groupId project.publish.groupId
-            artifactId project.publish.artifactId+"-"+variant.productFlavors.collect { it.name }.join("-")
-            version = project.publish.publishVersion
-
-            artifacts.all(it.name, project).each {
-                if (it instanceof CharSequence) {
-                    delegate.artifact "${project.buildDir}/outputs/aar/${project.name}-${variant.baseName}.aar"
-                } else {
-                    delegate.artifact it
-                }
-            }
-            from artifacts.from(project)
-        }
-    }
-}
-
