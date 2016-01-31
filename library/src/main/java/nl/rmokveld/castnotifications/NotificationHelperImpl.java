@@ -84,7 +84,7 @@ class NotificationHelperImpl implements NotificationHelper {
     }
 
     private static class NotificationChangeHelper {
-        private boolean mNotificationDirty = false;
+        private boolean mNotificationDirty = true;
         private Map<String, String> mLastKnownDevices;
 
         void notifyNotificationsChanged() {
