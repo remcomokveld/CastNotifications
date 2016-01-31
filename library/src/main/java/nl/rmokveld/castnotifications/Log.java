@@ -1,5 +1,9 @@
 package nl.rmokveld.castnotifications;
 
+import java.util.Map;
+
+import nl.thecapitals.firebasedevlogging.FirebaseLog;
+
 /**
  * Created by remco on 24/01/16.
  */
@@ -12,7 +16,12 @@ class Log {
     }
 
     static void d(String tag, String message) {
+        d(tag, message, null);
+    }
+
+    static void d(String tag, String message, Map<String, Object> extraData) {
         if (sLevel <= android.util.Log.DEBUG)
             android.util.Log.d(tag, message);
+        FirebaseLog.d(tag, message, extraData);
     }
 }

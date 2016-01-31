@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import nl.thecapitals.firebasedevlogging.FirebaseLog;
+
 public class CastNotificationManager {
 
     private static final String TAG = "CastNotificationManager";
@@ -73,6 +75,7 @@ public class CastNotificationManager {
     }
 
     public static void init(Context context, @NonNull CastCompanionInterface castCompanionInterface) {
+        FirebaseLog.init(context, "castnotifications", BuildConfig.FIREBASE_TOKEN, false, null);
         sInstance = new CastNotificationManager(context, castCompanionInterface);
     }
 

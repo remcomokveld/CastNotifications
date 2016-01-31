@@ -11,6 +11,7 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        buildConfigField "String", "FIREBASE_TOKEN", "\""+System.getenv("FIREBASE_TOKEN")+"\"" ?: "\"\""
     }
     buildTypes {
         release {
@@ -48,6 +49,8 @@ dependencies {
     gms84Compile 'com.google.android.gms:play-services-cast:8.4.0'
     gms83Compile 'com.google.android.gms:play-services-cast:8.3.0'
     gms75Compile 'com.google.android.gms:play-services-cast:7.5.0'
+
+    compile project(':firebase_logging')
 }
 
 apply plugin: 'com.novoda.bintray-release' // must be applied after your artifact generating plugin (eg. java / com.android.library)

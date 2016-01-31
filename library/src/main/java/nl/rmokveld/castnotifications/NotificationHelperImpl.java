@@ -44,7 +44,10 @@ class NotificationHelperImpl implements NotificationHelper {
     }
 
     private void postNotification(CastNotification castNotification, @Nullable Map<String, String> castDevices) {
-        if (!mNotificationChangeHelper.shouldPostNotifications()) return;
+        if (!mNotificationChangeHelper.shouldPostNotifications()) {
+            Log.d(TAG, "postNotification() called but not posting because nothing changed");
+            return;
+        }
         Log.d(TAG, "postNotification() called with: " + "castNotification = [" + castNotification + "], castDevices = [" + castDevices + "]");
         NotificationCompat.Builder builder = new NotificationCompatBuilder(mContext, castNotification.getId());
         CastNotificationManager.getInstance().getNotificationBuildCallback().onBuild(mContext, builder, castNotification.getId(), castNotification.getTitle(), castNotification.getContentText(), castNotification.getTimestamp(), castNotification.getCustomData(), castDevices != null && castDevices.size() > 0);
@@ -61,6 +64,7 @@ class NotificationHelperImpl implements NotificationHelper {
 
     @Override
     public void postNotifications(Map<String, String> availableRoutes) {
+        Log.d(TAG, "postNotifications() called with: " + "availableRoutes = [" + availableRoutes + "]");
         mNotificationChangeHelper.setDevices(availableRoutes);
         for (int i = 0; i < mCastNotifications.size(); i++) {
             postNotification(mCastNotifications.valueAt(i), availableRoutes);

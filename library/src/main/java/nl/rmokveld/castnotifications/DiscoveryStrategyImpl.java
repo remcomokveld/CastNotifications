@@ -10,6 +10,7 @@ import android.support.v7.media.MediaRouter;
 
 import com.google.android.gms.cast.CastDevice;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,6 +25,7 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
     private Map<String, String> mAvailableRoutes = new HashMap<>();
     private final Handler mHandler = new Handler();
     private boolean mHasActiveNotifications;
+    private String mLastBssid;
 
     public DiscoveryStrategyImpl(Context context) {
         mContext = context.getApplicationContext();
@@ -32,12 +34,13 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
 
     @Override
     public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-        Log.d(TAG, "onRouteAdded() called with: " + "router = [" + router + "], route = [" + route + "]");
+        Log.d(TAG, "onRouteAdded() called for route: : " + route.getId(), Collections.<String, Object>singletonMap("route", route.toString()));
         if (route.isDefault()) return;
         CastDevice castDevice = CastDevice.getFromBundle(route.getExtras());
         if (castDevice == null || !castDevice.isOnLocalNetwork()) return;
         if (!mAvailableRoutes.containsKey(route.getId())) {
             mHandler.removeCallbacksAndMessages(route.getId());
+            Log.d(TAG, "New cast device added: ", Collections.<String, Object>singletonMap("route", route.toString()));
             mAvailableRoutes.put(route.getId(), castDevice.getFriendlyName());
             notifyRoutesChanged();
         }
@@ -49,8 +52,9 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
 
     @Override
     public void onRouteRemoved(final MediaRouter router, final MediaRouter.RouteInfo route, boolean duringActiveDiscovery) {
-        Log.d(TAG, "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "], duringActiveDiscovery = [" + duringActiveDiscovery + "]");
+        Log.d(TAG, "onRouteRemoved() called for route: "+route.getId(), Collections.<String,Object>singletonMap("route", route.toString()));
         if (duringActiveDiscovery) {
+            Log.d(TAG, "onRouteRemoved() called during active discovery");
             if (!mAvailableRoutes.containsKey(route.getId())) return;
             mHandler.postAtTime(new OnRouteRemovedRunnable(router, route.getId()), route.getId(), SystemClock.uptimeMillis() + 3000);
         }

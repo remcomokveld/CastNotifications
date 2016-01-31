@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('library-firebase25-support2311-release.aar'))
