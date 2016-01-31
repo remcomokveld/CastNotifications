@@ -61,7 +61,12 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
     }
 
     @Override
-    public void onWifiConnected() {
+    public void onWifiConnected(String bssid) {
+        if (!bssid.equals(mLastBssid)) {
+            refreshRoutes();
+            notifyRoutesChanged();
+        }
+        mLastBssid = bssid;
         if (mHasActiveNotifications) {
             DiscoveryService.start(mContext, "wifi state changed");
         }
@@ -156,5 +161,20 @@ abstract class DiscoveryStrategyImpl implements DiscoveryStrategy {
         }
         if (changed)
             notifyRoutesChanged();
+    }
+
+    public void refreshRoutes() {
+        // make sure there are no pending remove route callbacks
+        mHandler.removeCallbacksAndMessages(null);
+
+        Log.d(TAG, "refreshRoutes() called with: " + "");
+        mAvailableRoutes.clear();
+        for (MediaRouter.RouteInfo routeInfo : mMediaRouter.getRoutes()) {
+            if (routeInfo.isDefault()) continue;
+            CastDevice castDevice = CastDevice.getFromBundle(routeInfo.getExtras());
+            if (castDevice == null || !castDevice.isOnLocalNetwork() || mAvailableRoutes.containsKey(routeInfo.getId())) continue;
+            mAvailableRoutes.put(routeInfo.getId(), castDevice.getFriendlyName());
+        }
+        notifyRoutesChanged();
     }
 }

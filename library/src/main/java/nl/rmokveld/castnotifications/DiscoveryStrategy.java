@@ -7,7 +7,7 @@ import java.util.Map;
 interface DiscoveryStrategy {
     void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route);
     void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route, boolean duringActiveDiscovery);
-    void onWifiConnected();
+    void onWifiConnected(String bssid);
     void onWifiDisconnected();
     void onScreenTurnedOn();
     void onScreenTurnedOff();

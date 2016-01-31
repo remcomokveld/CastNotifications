@@ -45,7 +45,7 @@ public class WifiStateReceiver extends BroadcastReceiver {
             if (sWasConnected == null || sWasConnected != isConnected) {
                 sWasConnected = isConnected;
                 if (isConnected) {
-                    CastNotificationManager.getInstance().getDiscoveryStrategy().onWifiConnected();
+                    CastNotificationManager.getInstance().getDiscoveryStrategy().onWifiConnected(wifiInfo.getBSSID());
                 } else {
                     CastNotificationManager.getInstance().getDiscoveryStrategy().onWifiDisconnected();
                 }
