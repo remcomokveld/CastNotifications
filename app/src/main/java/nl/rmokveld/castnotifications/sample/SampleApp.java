@@ -18,9 +18,9 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.Transi
 
 import org.json.JSONObject;
 
-import nl.rmokveld.castnotifications.CastCompanionInterface;
+import nl.rmokveld.castnotifications.interfaces.CastCompanionInterface;
 import nl.rmokveld.castnotifications.CastNotificationManager;
-import nl.rmokveld.castnotifications.DefaultNotificationBuildCallback;
+import nl.rmokveld.castnotifications.interfaces.impl.DefaultNotificationBuilder;
 
 public class SampleApp extends Application {
 
@@ -37,20 +37,26 @@ public class SampleApp extends Application {
                 .build());
 
 
-        VideoCastManager instance = VideoCastManager.getInstance();
-        CastNotificationManager.init(this, new CastCompanionInterface() {
+        final VideoCastManager instance = VideoCastManager.getInstance();
+        int logLevel = Log.DEBUG;
+        DefaultNotificationBuilder notificationBuilder = new DefaultNotificationBuilder() {
+
+            @Override
+            public void build(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData, boolean castDevicesAvailable) {
+                super.build(context, builder, id, title, subtitle, when, customData, castDevicesAvailable);
+                builder.setSmallIcon(R.drawable.ic_audiotrack);
+            }
+        };
+        CastCompanionInterface castCompanionInterface = new CastCompanionInterface() {
             @Override
             public void loadMedia(MediaInfo media) {
                 try {
                     VideoCastManager.getInstance().loadMedia(media, true, 0);
-                } catch (TransientNetworkDisconnectionException | NoConnectionException e) {
+                } catch (TransientNetworkDisconnectionException e) {
+                    e.printStackTrace();
+                } catch (NoConnectionException e) {
                     e.printStackTrace();
                 }
-            }
-
-            @Override
-            public MediaRouteSelector getMediaRouteSelector() {
-                return VideoCastManager.getInstance().getMediaRouteSelector();
             }
 
             @Override
@@ -62,16 +68,13 @@ public class SampleApp extends Application {
             public void onDeviceSelected(CastDevice device) {
                 VideoCastManager.getInstance().onDeviceSelected(device);
             }
-        });
-        CastNotificationManager.getInstance().setLogLevel(Log.DEBUG);
-        CastNotificationManager.getInstance().setCustomNotificationBuildCallback(new DefaultNotificationBuildCallback() {
 
             @Override
-            public void onBuild(Context context, NotificationCompat.Builder builder, int id, String title, String subtitle, long when, @Nullable JSONObject customData, boolean castDevicesAvailable) {
-                super.onBuild(context, builder, id, title, subtitle, when, customData, castDevicesAvailable);
-                builder.setSmallIcon(R.drawable.ic_audiotrack);
+            public MediaRouteSelector getMediaRouteSelector() {
+                return VideoCastManager.getInstance().getMediaRouteSelector();
             }
-        });
+        };
+        CastNotificationManager.init(this, new CastNotificationManager.Config(castCompanionInterface).withLogLever(logLevel).withNotificationBuilder(notificationBuilder));
         instance.addVideoCastConsumer(new VideoCastConsumerImpl() {
             @Override
             public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {

@@ -1,4 +1,4 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -7,9 +7,9 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.PowerManager;
 
-class DeviceStateHelper {
+public class DeviceStateHelper {
 
-    static boolean isWifiConnected(Context context) {
+    public static boolean isWifiConnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             boolean wifiConnected = false;
@@ -24,7 +24,7 @@ class DeviceStateHelper {
         }
     }
 
-    static boolean isScreenTurnedOn(Context context) {
+    public static boolean isScreenTurnedOn(Context context) {
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH)
             return powerManager.isInteractive();

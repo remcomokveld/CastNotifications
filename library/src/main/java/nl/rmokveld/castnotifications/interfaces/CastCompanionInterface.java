@@ -1,4 +1,4 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.interfaces;
 
 import android.support.v7.media.MediaRouteSelector;
 

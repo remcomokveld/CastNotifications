@@ -1,4 +1,4 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.interfaces.impl;
 
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -14,6 +14,8 @@ import org.json.JSONObject;
 
 import java.util.Calendar;
 import java.util.Iterator;
+
+import nl.rmokveld.castnotifications.interfaces.MediaInfoSerializer;
 
 public class DefaultMediaInfoSerializer implements MediaInfoSerializer {
     @Override

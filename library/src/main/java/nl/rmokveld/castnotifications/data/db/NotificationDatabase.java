@@ -1,4 +1,4 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.data.db;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -13,7 +13,10 @@ import android.util.SparseArray;
 import java.util.ArrayList;
 import java.util.List;
 
-class NotificationDatabase extends SQLiteOpenHelper {
+import nl.rmokveld.castnotifications.BuildConfig;
+import nl.rmokveld.castnotifications.data.model.CastNotification;
+
+public class NotificationDatabase extends SQLiteOpenHelper {
 
     private static final String DB_NAME = BuildConfig.APPLICATION_ID+".notifications.db";
     private static final int DB_VERSION = 1;
@@ -37,7 +40,7 @@ class NotificationDatabase extends SQLiteOpenHelper {
     }
 
     @WorkerThread
-    private List<CastNotification> getCastNotifications() {
+    public List<CastNotification> getCastNotifications() {
         Cursor cursor = getReadableDatabase().query(CastNotification.TABLE_NAME, null, null, null, null, null, null);
         List<CastNotification> notifications = new ArrayList<>(cursor.getCount());
         if (cursor.moveToFirst()) {
@@ -105,7 +108,7 @@ class NotificationDatabase extends SQLiteOpenHelper {
         });
     }
 
-    interface Callback {
+    public interface Callback {
         void onComplete(List<CastNotification> castNotifications);
     }
 }

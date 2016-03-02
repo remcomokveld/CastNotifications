@@ -1,10 +1,13 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.services;
 
 import android.app.Service;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.v7.media.MediaRouter;
+
+import nl.rmokveld.castnotifications.CastNotificationManager;
+import nl.rmokveld.castnotifications.utils.Log;
 
 public abstract class BaseCastService extends Service {
 
@@ -27,12 +30,7 @@ public abstract class BaseCastService extends Service {
         mCallback = new MediaRouter.Callback() {
             @Override
             public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-                BaseCastService.this.onRouteAdded(router, route);
-            }
-
-            @Override
-            public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-                BaseCastService.this.onRouteRemoved(router, route);
+                mCastNotificationManager.getDiscoveryStrategy().onRouteAdded(route);
             }
         };
         mWakeLock = ((PowerManager) getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "CastNofications");
@@ -103,8 +101,4 @@ public abstract class BaseCastService extends Service {
         Log.d(getTAG(), "onRouteAdded() called with: " + "router = [" + router + "], route = [" + route + "]");
     }
 
-    protected void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-        Log.d(getTAG(), "onRouteRemoved() called with: " + "router = [" + router + "], route = [" + route + "]");
-        mCastNotificationManager.getDiscoveryStrategy().onRouteRemoved(router, route, true);
-    }
 }

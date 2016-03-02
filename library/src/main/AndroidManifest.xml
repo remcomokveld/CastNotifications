@@ -9,21 +9,24 @@
         >
 
         <service
-            android:name="nl.rmokveld.castnotifications.DiscoveryService"
+            android:name=".services.DiscoveryService"
             android:exported="false"/>
 
         <service
-            android:name="nl.rmokveld.castnotifications.StartCastService"
+            android:name=".services.StartCastService"
             android:exported="false"/>
 
-        <receiver android:name="nl.rmokveld.castnotifications.ScreenStateReceiver">
+        <service android:name=".services.NotificationService"
+            android:exported="false" />
+
+        <receiver android:name=".receivers.ScreenStateReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_OFF"/>
                 <action android:name="android.intent.action.SCREEN_ON"/>
             </intent-filter>
         </receiver>
 
-        <receiver android:name="nl.rmokveld.castnotifications.WifiStateReceiver">
+        <receiver android:name=".receivers.WifiStateReceiver">
             <intent-filter>
                 <action android:name="android.net.wifi.STATE_CHANGE"/>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
@@ -31,7 +34,7 @@
         </receiver>
 
         <receiver
-            android:name="nl.rmokveld.castnotifications.NotificationDeletedReceiver"
+            android:name=".receivers.NotificationDeletedReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.action.NOTIFICATION_DELETED"/>

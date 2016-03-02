@@ -1,4 +1,4 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.data.model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -9,20 +9,22 @@ import android.support.annotation.Nullable;
 
 import com.google.android.gms.cast.MediaInfo;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-class CastNotification implements Parcelable {
+import nl.rmokveld.castnotifications.CastNotificationManager;
+import nl.rmokveld.castnotifications.interfaces.MediaInfoSerializer;
 
-    private static MediaInfoSerializer sMediaInfoSerializer = new DefaultMediaInfoSerializer();
+public class CastNotification implements Parcelable {
+
+    private static MediaInfoSerializer sMediaInfoSerializer;
     public static final String TABLE_NAME = "Notifications";
-    static final String COL_ID = "id";
+    public static final String COL_ID = "id";
     private static final String COL_TITLE = "title";
     private static final String COL_TEXT = "text";
     private static final String COL_TIMESTAMP = "timestamp";
     private static final String COL_MEDIA_INFO = "media_info";
     private static final String COL_CUSTOM_DATA = "custom_data";
-    static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" +
+    public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" +
             COL_ID + " INTEGER PRIMARY KEY," +
             COL_TITLE + " TEXT," +
             COL_TEXT + " TEXT," +
@@ -50,7 +52,7 @@ class CastNotification implements Parcelable {
         mTitle = cursor.getString(cursor.getColumnIndexOrThrow(COL_TITLE));
         mContentText = cursor.getString(cursor.getColumnIndexOrThrow(COL_TEXT));
         mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(COL_TIMESTAMP));
-        mMediaInfo = sMediaInfoSerializer.toMediaInfo(cursor.getString(cursor.getColumnIndexOrThrow(COL_MEDIA_INFO)));
+        mMediaInfo = getMediaInfoSerializer().toMediaInfo(cursor.getString(cursor.getColumnIndexOrThrow(COL_MEDIA_INFO)));
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(cursor.getString(cursor.getColumnIndexOrThrow(COL_CUSTOM_DATA)));
@@ -65,16 +67,12 @@ class CastNotification implements Parcelable {
         //noinspection ResourceType
         mTimestamp = in.readLong();
         mDeviceName = in.readString();
-        mMediaInfo = sMediaInfoSerializer.toMediaInfo(in.readString());
+        mMediaInfo = getMediaInfoSerializer().toMediaInfo(in.readString());
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(in.readString());
         } catch (Exception ignored) {}
         mCustomData = jsonObject;
-    }
-
-    public static void setMediaInfoSerializer(MediaInfoSerializer mediaInfoSerializer) {
-        sMediaInfoSerializer = mediaInfoSerializer;
     }
 
     @Override
@@ -84,7 +82,7 @@ class CastNotification implements Parcelable {
         dest.writeString(mContentText);
         dest.writeLong(mTimestamp);
         dest.writeString(mDeviceName);
-        dest.writeString(sMediaInfoSerializer.toJson(mMediaInfo));
+        dest.writeString(getMediaInfoSerializer().toJson(mMediaInfo));
         dest.writeString(mCustomData != null ? mCustomData.toString() : null);
     }
 
@@ -134,10 +132,16 @@ class CastNotification implements Parcelable {
         contentValues.put(COL_ID, mId);
         contentValues.put(COL_TITLE, mTitle);
         contentValues.put(COL_TEXT, mContentText);
-        contentValues.put(COL_MEDIA_INFO, sMediaInfoSerializer.toJson(mMediaInfo));
+        contentValues.put(COL_MEDIA_INFO, getMediaInfoSerializer().toJson(mMediaInfo));
         if (mCustomData != null)
             contentValues.put(COL_CUSTOM_DATA, mCustomData.toString());
         return contentValues;
     }
 
+    private static MediaInfoSerializer getMediaInfoSerializer() {
+        if (sMediaInfoSerializer == null) {
+            sMediaInfoSerializer = CastNotificationManager.getInstance().getMediaInfoSerializer();
+        }
+        return sMediaInfoSerializer;
+    }
 }

@@ -4,7 +4,7 @@ CastNotifications
 [ ![Download](https://api.bintray.com/packages/rmokveld/maven/cast-notification/images/download.svg) ](https://bintray.com/rmokveld/maven/cast-notification/_latestVersion)
 [![license](https://img.shields.io/hexpm/l/plug.svg)](LICENSE)
 
-[![Build Status](https://travis-ci.org/remcomokveld/CastNotifications.svg?branch=master)](https://travis-ci.org/remcomokveld/CastNotifications)
+[![Build Status](https://travis-ci.org/remcomokveld/CastNotifications.svg?branch=master)](https://travis-ci.com/remcomokveld/CastNotifications)
 
 
 Library for showing system notifications with cast support
@@ -91,8 +91,8 @@ In order to update the notifications when cast availability changes the notifica
 Since MediaInfo by default does not have a serialization option a custom MediaInfoSerializer interface can be set on the CastNotificationManager
 to handle MediaInfoSerialization. For default serialization see the DefaultMediaInfoSerializer.
 
-### NotificationBuildCallback
-To customize how the notifications look you can also set a custom NotificationBuilder. See DefaultNotificationBuildCallback for an implementation example.
+### NotificationBuilder
+To customize how the notifications look you can also set a custom NotificationBuilder. See DefaultNotificationBuilder for an implementation example.
 
 Download
 --------
@@ -101,13 +101,13 @@ Download
 The library is hosted on jcenter. To avoid version conflicts in Play Services and Support libraries, and prevent stuff from breaking when there are new versions of either of them there are seperate flavors for different dependencies.
 ```groovy
 // For Play Services 7.5.0 Support lib 23.1.1
-compile 'nl.rmokveld:cast-notification-gms75-support2311"0.1.13+'
+compile 'nl.rmokveld:cast-notification-gms75-support2311"0.1.13'
 
 // For Play Services 8.3.0 Support lib 23.1.1
-compile 'nl.rmokveld:cast-notification-gms83-support2311"0.1.13+'
+compile 'nl.rmokveld:cast-notification-gms83-support2311"0.1.13'
 
 // For Play Services 8.4.0 Support lib 23.1.1
-compile 'nl.rmokveld:cast-notification-gms84-support2311"0.1.13+'
+compile 'nl.rmokveld:cast-notification-gms84-support2311"0.1.13'
 
 ```
 

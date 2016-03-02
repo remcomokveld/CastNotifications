@@ -1,4 +1,4 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.services;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +12,11 @@ import android.support.v7.media.MediaRouter;
 
 import com.google.android.gms.cast.CastDevice;
 
+import nl.rmokveld.castnotifications.data.model.CastNotification;
+import nl.rmokveld.castnotifications.CastNotificationManager;
+import nl.rmokveld.castnotifications.R;
+import nl.rmokveld.castnotifications.utils.Log;
+
 public class StartCastService extends BaseCastService implements CastNotificationManager.OnApplicationConnectedListener {
 
     private static final String EXTRA_NOTIFICATION = "notification_id";
@@ -21,6 +26,7 @@ public class StartCastService extends BaseCastService implements CastNotificatio
 
     private RequestedDevice mRequestedDevice;
     private CastNotification mCastNotification;
+    private NotificationCompat.Builder mNotificationBuilder;
 
     @NonNull
     public static Intent getIntent(CastNotification castNotification, Context context, String routeId, String deviceName) {
@@ -39,6 +45,7 @@ public class StartCastService extends BaseCastService implements CastNotificatio
     public void onCreate() {
         super.onCreate();
         mCastNotificationManager.addOnApplicationConnectedListener(this);
+        mNotificationBuilder = new NotificationCompat.Builder(this);
     }
 
     @Override
@@ -47,11 +54,10 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         mRequestedDevice = new RequestedDevice(intent.getStringExtra(EXTRA_DEVICE_ID), intent.getStringExtra(EXTRA_DEVICE_NAME));
         mCastNotification = intent.getParcelableExtra(EXTRA_NOTIFICATION);
         mCastNotificationManager.cancel(mCastNotification.getId());
-        NotificationCompat.Builder notificationBuilder = new NotificationCompatBuilder(this, mCastNotification.getId());
-        mCastNotificationManager.getNotificationBuildCallback().onBuildForConnecting(this, notificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), System.currentTimeMillis(), mCastNotification.getCustomData(), mRequestedDevice.getName());
+        mCastNotificationManager.getNotificationBuilder().buildForConnecting(this, mNotificationBuilder, mCastNotification.getId(), mCastNotification.getTitle(), System.currentTimeMillis(), mCastNotification.getCustomData(), mRequestedDevice.getName());
 
         acquireWakeLocks();
-        startForeground(mCastNotification.getId(), notificationBuilder.build());
+        startForeground(mCastNotification.getId(), mNotificationBuilder.build());
 
         findCastDevice();
 
@@ -123,8 +129,8 @@ public class StartCastService extends BaseCastService implements CastNotificatio
         Log.d(TAG, "onDiscoveryTimeout() called with: " + "");
         if (mRequestedDevice != null) {
             // discovery failed
-            NotificationCompat.Builder builder = new NotificationCompatBuilder(this, mCastNotification.getId());
-            mCastNotificationManager.getNotificationBuildCallback().onBuildForError(
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+            mCastNotificationManager.getNotificationBuilder().buildForError(
                     this, builder, mCastNotification.getId(),
                     getString(R.string.cast_notifications_failed_title, mRequestedDevice.getName()),
                     getString(R.string.cast_ncast_notifications_failed_text), System.currentTimeMillis(), mCastNotification.getCustomData());

@@ -1,8 +1,10 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import nl.rmokveld.castnotifications.CastNotificationManager;
 
 public class ScreenStateReceiver extends BroadcastReceiver {
 

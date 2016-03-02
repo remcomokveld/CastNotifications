@@ -1,155 +1,157 @@
 package nl.rmokveld.castnotifications;
 
 import android.content.Context;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.media.MediaRouteSelector;
-import android.support.v7.media.MediaRouter;
 
 import com.google.android.gms.cast.MediaInfo;
 
 import org.json.JSONObject;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import nl.rmokveld.castnotifications.data.model.CastNotification;
+import nl.rmokveld.castnotifications.interfaces.CastCompanionInterface;
+import nl.rmokveld.castnotifications.interfaces.DiscoveryStrategy;
+import nl.rmokveld.castnotifications.interfaces.MediaInfoSerializer;
+import nl.rmokveld.castnotifications.interfaces.NotificationBuilder;
+import nl.rmokveld.castnotifications.interfaces.NotificationHelper;
+import nl.rmokveld.castnotifications.interfaces.impl.DefaultMediaInfoSerializer;
+import nl.rmokveld.castnotifications.interfaces.impl.DefaultNotificationBuilder;
+import nl.rmokveld.castnotifications.interfaces.impl.DiscoveryStrategyImpl;
+import nl.rmokveld.castnotifications.interfaces.impl.NotificationHelperImpl;
+import nl.rmokveld.castnotifications.services.NotificationService;
+import nl.rmokveld.castnotifications.utils.Log;
 
 public class CastNotificationManager {
 
     private static final String TAG = "CastNotificationManager";
 
-    private static CastNotificationManager sInstance;
+    private static CastNotificationManager instance;
 
-    private final Context mContext;
+    private final Context context;
+    private final CastCompanionInterface castCompanionInterface;
+    private final NotificationBuilder notificationBuilder;
+    private final MediaInfoSerializer mediaInfoSerializer;
+    private final DiscoveryStrategy discoveryStrategy;
+    private final NotificationHelper notificationHelper;
 
-    private final CastCompanionInterface mCastCompanionInterface;
-    private NotificationBuildCallback mNotificationBuildCallback = new DefaultNotificationBuildCallback();
+    private final Set<OnApplicationConnectedListener> onApplicationConnectedListeners = new HashSet<>();
 
-    private final DiscoveryStrategy mDiscoveryStrategy;
-    private final NotificationHelper mNotificationHelper;
-    private final NotificationDatabase mNotificationDatabase;
-
-    private final Set<OnApplicationConnectedListener> mOnApplicationConnectedListener = new HashSet<>();
-
-    private CastNotificationManager(Context context,
-                                    @NonNull CastCompanionInterface castCompanionInterface) {
-        mContext = context.getApplicationContext();
-        mCastCompanionInterface = castCompanionInterface;
-        mDiscoveryStrategy = new DiscoveryStrategyImpl(mContext) {
-            @Override
-            void onRoutesChanged(Map<String, String> availableRoutes) {
-                Log.d(TAG, "onRoutesChanged() called with: " + "availableRoutes = [" + availableRoutes + "]");
-                mNotificationHelper.postNotifications(availableRoutes);
-            }
-        };
-        mNotificationHelper = new NotificationHelperImpl(mContext);
-        mNotificationDatabase = new NotificationDatabase(mContext);
-        mNotificationDatabase.getCastNotifications(new NotificationDatabase.Callback() {
-            @Override
-            public void onComplete(List<CastNotification> castNotifications) {
-                mNotificationHelper.addAll(castNotifications, mDiscoveryStrategy.getAvailableRoutes());
-                mDiscoveryStrategy.onActiveNotificationsChanged(true);
-            }
-        });
-
-        MediaRouter mediaRouter = MediaRouter.getInstance(mContext);
-        mediaRouter.addCallback(mCastCompanionInterface.getMediaRouteSelector(), new MediaRouter.Callback() {
-                @Override
-                public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-                    super.onRouteAdded(router, route);
-                    mDiscoveryStrategy.onRouteAdded(router, route);
-                }
-
-                @Override
-                public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-                    super.onRouteRemoved(router, route);
-                    mDiscoveryStrategy.onRouteRemoved(router, route, false);
-                }
-            });
-        for (MediaRouter.RouteInfo routeInfo : mediaRouter.getRoutes()) {
-            mDiscoveryStrategy.onRouteAdded(mediaRouter, routeInfo);
-        }
-    }
-
-    public static void init(Context context, @NonNull CastCompanionInterface castCompanionInterface) {
-        sInstance = new CastNotificationManager(context, castCompanionInterface);
+    public static void init(Context context, @NonNull Config config) {
+        instance = new CastNotificationManager(context, config);
     }
 
     public static CastNotificationManager getInstance() {
-        if (sInstance == null) {
-            throw new NullPointerException("CastNotificationManager not initialized");
+        if (instance == null) {
+            throw new ExceptionInInitializerError("CastNotificationManager not initialized");
         }
-        return sInstance;
+        return instance;
+    }
+
+    private CastNotificationManager(Context context,
+                                    @NonNull Config config) {
+        this.context = context =  context.getApplicationContext();
+        castCompanionInterface = config.castCompanionInterface;
+        notificationBuilder = config.notificationBuilder != null ? config.notificationBuilder : new DefaultNotificationBuilder();
+        mediaInfoSerializer = config.mediaInfoSerializer != null ? config.mediaInfoSerializer : new DefaultMediaInfoSerializer();
+        Log.setLevel(config.logLevel);
+
+        discoveryStrategy = new DiscoveryStrategyImpl(context);
+        notificationHelper = new NotificationHelperImpl(context, discoveryStrategy);
+
+        NotificationService.update(context);
     }
 
     public void notify(int id, String title, String contentText, @NonNull MediaInfo mediaInfo, @Nullable JSONObject customData) {
         Log.d(TAG, "notify() called with: " + "id = [" + id + "], title = [" + title + "], contentText = [" + contentText + "], mediaInfo = [" + mediaInfo + "]");
         CastNotification notification = new CastNotification(id, title, contentText, System.currentTimeMillis(), mediaInfo, customData);
-        mNotificationHelper.add(notification, mDiscoveryStrategy.getAvailableRoutes());
-        mNotificationDatabase.persistNotification(notification);
-        mDiscoveryStrategy.onActiveNotificationsChanged(mNotificationHelper.hasActiveNotifications());
+        if (Looper.getMainLooper() == Looper.myLooper())
+            NotificationService.addNotification(context, notification);
+        else
+            notificationHelper.notify(notification);
     }
 
     public void cancel(int notificationId) {
         Log.d(TAG, "cancel() called with: " + "notificationId = [" + notificationId + "]");
-        mNotificationHelper.cancel(notificationId);
-        mNotificationDatabase.delete(notificationId);
-        mDiscoveryStrategy.onActiveNotificationsChanged(mNotificationHelper.hasActiveNotifications());
-    }
-
-    public void setLogLevel(int level) {
-        Log.setLevel(level);
+        if (Looper.getMainLooper() == Looper.myLooper())
+            NotificationService.cancel(context, notificationId);
+        else
+            notificationHelper.cancel(notificationId);
     }
 
     @NonNull
-    MediaRouteSelector getMediaRouteSelector() {
-        return mCastCompanionInterface.getMediaRouteSelector();
+    public MediaRouteSelector getMediaRouteSelector() {
+        return castCompanionInterface.getMediaRouteSelector();
     }
 
     @NonNull
-    CastCompanionInterface getCastCompanionInterface() {
-        return mCastCompanionInterface;
+    public CastCompanionInterface getCastCompanionInterface() {
+        return castCompanionInterface;
     }
 
-    @SuppressWarnings("unused")
-    public void setCustomMediaInfoSerializer(MediaInfoSerializer mediaInfoSerializer) {
-        CastNotification.setMediaInfoSerializer(mediaInfoSerializer);
+    public NotificationBuilder getNotificationBuilder() {
+        return notificationBuilder;
     }
 
-    @SuppressWarnings("unused")
-    public void setCustomNotificationBuildCallback(NotificationBuildCallback callback) {
-        mNotificationBuildCallback = callback;
+    public MediaInfoSerializer getMediaInfoSerializer() {
+        return mediaInfoSerializer;
     }
 
-    NotificationBuildCallback getNotificationBuildCallback() {
-        return mNotificationBuildCallback;
+    public DiscoveryStrategy getDiscoveryStrategy() {
+        return discoveryStrategy;
     }
 
-    DiscoveryStrategy getDiscoveryStrategy() {
-        return mDiscoveryStrategy;
-    }
-
-    Context getContext() {
-        return mContext;
+    public Context getContext() {
+        return context;
     }
 
     public void onApplicationConnected() {
-        for (OnApplicationConnectedListener listener : mOnApplicationConnectedListener) {
+        for (OnApplicationConnectedListener listener : onApplicationConnectedListeners) {
             listener.onApplicationConnected();
         }
     }
 
-    void addOnApplicationConnectedListener(OnApplicationConnectedListener listener) {
-        mOnApplicationConnectedListener.add(listener);
+    public void addOnApplicationConnectedListener(OnApplicationConnectedListener listener) {
+        onApplicationConnectedListeners.add(listener);
     }
 
-    void removeOnApplicationConnectedListener(OnApplicationConnectedListener listener) {
-        mOnApplicationConnectedListener.remove(listener);
+    public void removeOnApplicationConnectedListener(OnApplicationConnectedListener listener) {
+        onApplicationConnectedListeners.remove(listener);
     }
 
-    interface OnApplicationConnectedListener {
+    public interface OnApplicationConnectedListener {
         void onApplicationConnected();
+    }
+
+    @SuppressWarnings("unused")
+    public static class Config {
+        CastCompanionInterface castCompanionInterface;
+        NotificationBuilder notificationBuilder;
+        MediaInfoSerializer mediaInfoSerializer;
+        int logLevel = android.util.Log.WARN;
+
+        public Config(@NonNull CastCompanionInterface castCompanionInterface) {
+            this.castCompanionInterface = castCompanionInterface;
+        }
+
+        public Config withNotificationBuilder(NotificationBuilder notificationBuilder) {
+            this.notificationBuilder = notificationBuilder;
+            return this;
+        }
+
+        public Config withMediaInfoSerializer(MediaInfoSerializer mediaInfoSerializer) {
+            this.mediaInfoSerializer = mediaInfoSerializer;
+            return this;
+        }
+
+        public Config withLogLever(int logLevel) {
+            this.logLevel = logLevel;
+            return this;
+        }
     }
 
 }

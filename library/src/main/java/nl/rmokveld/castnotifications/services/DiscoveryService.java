@@ -1,4 +1,4 @@
-package nl.rmokveld.castnotifications;
+package nl.rmokveld.castnotifications.services;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,6 +7,10 @@ import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+
+import nl.rmokveld.castnotifications.BuildConfig;
+import nl.rmokveld.castnotifications.utils.DeviceStateHelper;
+import nl.rmokveld.castnotifications.utils.Log;
 
 public class DiscoveryService extends BaseCastService {
 
@@ -25,7 +29,7 @@ public class DiscoveryService extends BaseCastService {
         context.startService(buildIntent(context, false, tag));
     }
 
-    static Intent buildIntent(Context context, boolean wakeup, String tag) {
+    public static Intent buildIntent(Context context, boolean wakeup, String tag) {
         return new Intent(context, DiscoveryService.class).setAction(wakeup ? ACTION_START_WAKEUP : ACTION_START)
                 .putExtra("tag", tag);
     }
@@ -74,7 +78,7 @@ public class DiscoveryService extends BaseCastService {
     @Override
     protected void onDiscoveryTimeout() {
         Log.d(getTAG(), "onDiscoveryTimeout() called with: " + "");
-        mCastNotificationManager.getDiscoveryStrategy().onBackgroundDiscoveryStopped();
+        mCastNotificationManager.getDiscoveryStrategy().onBackgroundDiscoveryTimeout();
         stopSelf();
     }
 
