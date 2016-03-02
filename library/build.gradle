@@ -63,7 +63,7 @@ buildscript {
 
 import com.novoda.gradle.release.*
 
-version = "0.1"
+version = "0.3"
 
 publish {
     userOrg = 'rmokveld'
