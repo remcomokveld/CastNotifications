@@ -32,8 +32,13 @@ android {
         gms75 {
             dimension "gms"
         }
-
+        support2301 {
+            dimension "support"
+        }
         support2311 {
+            dimension "support"
+        }
+        support2320 {
             dimension "support"
         }
 
@@ -43,10 +48,23 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+    //noinspection GradleDependency
+    support2301Compile 'com.android.support:appcompat-v7:23.0.1'
+    //noinspection GradleDependency
+    support2301Compile 'com.android.support:mediarouter-v7:23.0.1'
+    //noinspection GradleDependency
     support2311Compile 'com.android.support:appcompat-v7:23.1.1'
+    //noinspection GradleDependency
     support2311Compile 'com.android.support:mediarouter-v7:23.1.1'
+    //noinspection GradleDependency
+    support2320Compile 'com.android.support:appcompat-v7:23.2.0'
+    support2320Compile 'com.android.support:mediarouter-v7:23.2.0'
+
+
     gms84Compile 'com.google.android.gms:play-services-cast:8.4.0'
+    //noinspection GradleDependency
     gms83Compile 'com.google.android.gms:play-services-cast:8.3.0'
+    //noinspection GradleDependency
     gms75Compile 'com.google.android.gms:play-services-cast:7.5.0'
 }
 
