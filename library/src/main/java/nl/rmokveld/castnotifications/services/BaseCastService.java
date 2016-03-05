@@ -43,7 +43,7 @@ public abstract class BaseCastService extends Service {
         if (withWakeLock) {
             acquireWakeLocks();
         }
-        mMediaRouter.addCallback(mCastNotificationManager.getMediaRouteSelector(), mCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+        mMediaRouter.addCallback(mCastNotificationManager.getMediaRouteSelector(), mCallback, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
         resetTimeout(timeout);
     }
 
