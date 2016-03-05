@@ -1,10 +1,12 @@
 package nl.rmokveld.castnotifications;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.media.MediaRouteSelector;
+import android.support.v7.media.MediaRouter;
 
 import com.google.android.gms.cast.MediaInfo;
 
@@ -63,7 +65,21 @@ public class CastNotificationManager {
         discoveryStrategy = new DiscoveryStrategyImpl(context);
         notificationHelper = new NotificationHelperImpl(context, discoveryStrategy);
 
+        MediaRouter.Callback mediaRouterCallback = new MediaRouter.Callback() {
+            @Override
+            public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
+                discoveryStrategy.onRouteAdded(route);
+            }
+
+            @Override
+            public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
+                discoveryStrategy.onRouteRemoved(route);
+            }
+        };
+
         NotificationService.update(context);
+
+        MediaRouter.getInstance(context).addCallback(castCompanionInterface.getMediaRouteSelector(), mediaRouterCallback);
     }
 
     public void notify(int id, String title, String contentText, @NonNull MediaInfo mediaInfo, @Nullable JSONObject customData) {

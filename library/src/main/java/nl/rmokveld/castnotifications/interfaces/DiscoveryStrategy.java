@@ -14,4 +14,5 @@ public interface DiscoveryStrategy {
     void setHasActiveNotifications(boolean hasActiveNotifications);
     @Nullable Map<String,String> getAvailableRoutes();
     void onBackgroundDiscoveryTimeout();
+    void onRouteRemoved(MediaRouter.RouteInfo route);
 }

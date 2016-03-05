@@ -50,6 +50,11 @@ public class DiscoveryStrategyImpl implements DiscoveryStrategy {
     }
 
     @Override
+    public void onRouteRemoved(MediaRouter.RouteInfo route) {
+
+    }
+
+    @Override
     public void onWifiConnected() {
         if (mHasActiveNotifications) {
             DiscoveryService.start(mContext, "wifi state changed");
